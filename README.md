@@ -19,5 +19,5 @@ Information from the jenkins:
 
 # Feasibility
 
-[x] It's possible to get machine-readable info from allure
-[ ] It's possible to use db or generally call third-party program from the extension (in later case, I'd need to wrap the db).
+- [x] It's possible to get machine-readable info from allure
+- [ ] It's possible to use db or generally call third-party program from the extension (in later case, I'd need to wrap the db).
