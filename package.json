@@ -47,6 +47,8 @@
 		"sqlite3": "^4.1.0",
 		"tmp": "^0.1.0",
 		"typed-rest-client": "^1.5.0",
-		"unzipper": "^0.10.5"
+		"typeorm": "^0.2.19",
+		"unzipper": "^0.10.5",
+		"winston-decorator": "0.0.8"
 	}
 }

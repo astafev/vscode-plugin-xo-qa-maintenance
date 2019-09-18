@@ -1,7 +1,23 @@
 import { JenkinsAPI } from "./jenkins/jenkins";
+import { DbPopulator } from "./db/populator";
 
-console.log('heelo world3');
-let jenkins = new JenkinsAPI('11e511b2463afa1d7ec883db743dad6ea9', 'eastafev',
-    'http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/');
+const commonConfig = {
+    jenkinsAuth: {
+        token: '11e511b2463afa1d7ec883db743dad6ea9',
+        user: 'eastafev'
+    }
+};
 
-jenkins.pullAllureReport(2344);
+const projectSpecificConfig = {
+    db: 'F:/data/vscode-extension-maintenance/responsetek.db',
+    jenkinsJob: 'http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/'
+};
+
+let jenkins = new JenkinsAPI(commonConfig.jenkinsAuth.token, commonConfig.jenkinsAuth.user,
+    projectSpecificConfig.jenkinsJob);
+
+let result = jenkins.pullAllureReport(2342);
+result.then(result1=>{
+    let db = new DbPopulator(projectSpecificConfig.db);
+    db.store(result1);
+});

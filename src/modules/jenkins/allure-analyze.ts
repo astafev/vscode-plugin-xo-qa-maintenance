@@ -1,20 +1,24 @@
 import * as fs from 'fs';
+import { IJenkinsBuild } from 'jenkins-api-ts-typings';
 
 export class AlluresReportAnalyzer {
     constructor(private readonly dir: string) {
     }
 
-    public async parse() {
-        this.parseBehaviors();
+    public parse() {
+        return {
+            behaviors: this.parseBehaviors()
+        };
     }
 
-    private async parseBehaviors() {
+    private parseBehaviors() {
         let content = fs.readFileSync(`${this.dir}\\allure-report\\data\\behaviors.json`);
         let behaviors: Behaviors = JSON.parse(content.toString());
         behaviors.children.forEach(b => {
             let caseId = this.getTestCaseId(b.name);
-            console.log(`Case: ${b.name}. id: ${caseId}. Status: ${b.status}`);
+            b.testCaseId = Number.parseInt(caseId);
         });
+        return behaviors;
     }
 
     private getTestCaseId(name: string) {
@@ -26,14 +30,25 @@ export class AlluresReportAnalyzer {
     }
 }
 
-interface Behaviors {
+export function getTestSuite(build: IJenkinsBuild) {
+    let params: any = build.actions.find(action => {
+        return action._class === 'hudson.model.ParametersAction';
+    });
+    let suitesParam = params.parameters.find((param:any) => {
+        return param['name'] === 'SUITES';
+    });
+    return suitesParam['value'];
+}
+
+export interface Behaviors {
     uid: string;
     children: BehaviorChild[];
     name: string;
 }
-interface BehaviorChild {
+export interface BehaviorChild {
     name: string;
     uid: string;
+    testCaseId: number;
     parentUid: string;
     status: string;
     flaky: boolean;

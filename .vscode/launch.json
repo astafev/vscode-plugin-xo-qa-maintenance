@@ -10,7 +10,8 @@
 			"request": "launch",
 			"name": "Launch Program",
 			"program": "${workspaceFolder}/src/modules/test.ts",
-			"outFiles": ["${workspaceFolder}/out/**/*.js"]
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"preLaunchTask": "npm: watch"
 		},
 		{
 			"name": "Run Extension",

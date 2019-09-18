@@ -54,12 +54,13 @@ export class JenkinsAPI {
     }
 
     public async pullAllureReport(buildId: number) {
-        this.getBuildStatus(buildId).then(build => {
-            this.checkBuild(build);
-            return this.downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
-        }).then(dir => {
-            new AlluresReportAnalyzer(dir).parse();
-        });
+        let build = await this.getBuildStatus(buildId);
+        this.checkBuild(build);
+        let dir = await this.downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
+        return {
+            build: build,
+            report: new AlluresReportAnalyzer(dir).parse(),
+        };
     }
 
     private downloadAndUnzip(address: string): Promise<string> {
