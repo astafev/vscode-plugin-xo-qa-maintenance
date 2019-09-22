@@ -1,27 +1,35 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { IdeCommands } from './modules/ide/commands';
+import { parseRange } from './utils';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vscode-plugin-xo-qa-maintenance" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World asd!');
+	let commands = new IdeCommands({
+		jenkinsToken: '11e511b2463afa1d7ec883db743dad6ea9',
+		jenkinsUser: 'eastafev'
+	}, {
+		db: 'F:/data/vscode-extension-maintenance/responsetek.db',
+		jenkinsJob: 'http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/'
+	});
+	console.log('Starting');
+	//commands.init();
+	console.log('Started');
+	let disposable = vscode.commands.registerCommand('xoQAMaintCIJobAnalyzer.pullTheBuilds', async () => {
+		let buildsInput = await vscode.window.showInputBox({
+			placeHolder: '10, 11, 12-15',
+			prompt: 'the range is inclusive'
+		});
+		if (!buildsInput) {
+			// do nothing
+			return;
+		}
+		let builds = parseRange(buildsInput);
+		commands.pullTheBuilds(builds);
 	});
 
 	context.subscriptions.push(disposable);
+
+
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

@@ -1,10 +1,8 @@
 import * as rm from 'typed-rest-client/RestClient';
 import { BasicCredentialHandler } from 'typed-rest-client/Handlers';
 import { IJenkinsBuild } from 'jenkins-api-ts-typings';
-import * as fs from 'fs';
 import * as tmp from 'tmp';
 import * as unzip from 'unzipper';
-import { promisify } from 'util';
 import { AlluresReportAnalyzer } from './allure-analyze';
 
 export class JenkinsAPI {

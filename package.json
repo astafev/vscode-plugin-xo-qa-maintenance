@@ -10,14 +10,19 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld"
+		"onCommand:xoQAMaintCIJobAnalyzer.pullTheBuilds"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "xoQAMaintCIJobAnalyzer.pullTheBuilds",
+				"title": "Pull CI builds"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.doCoolStuff",
+				"title": "do cool stuff",
+				"when": "editorLangId == typescript, https://code.visualstudio.com/docs/getstarted/keybindings#_when-clause-contexts"
 			}
 		]
 	},
@@ -32,23 +37,28 @@
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^10.12.21",
+		"@types/tmp": "^0.1.0",
+		"@types/unzipper": "^0.10.0",
 		"@types/vscode": "^1.38.0",
 		"glob": "^7.1.4",
 		"mocha": "^6.1.4",
-		"typescript": "^3.3.1",
+		"ts-loader": "^6.1.1",
 		"tslint": "^5.12.1",
-		"vscode-test": "^1.2.0"
+		"vscode-test": "^1.2.0",
+		"webpack": "^4.40.2",
+		"webpack-cli": "^3.3.9"
 	},
 	"dependencies": {
 		"@types/sqlite3": "^3.1.5",
-		"@types/tmp": "^0.1.0",
-		"@types/unzipper": "^0.10.0",
-		"jenkins-api-ts-typings": "^0.8.7",
 		"sqlite3": "^4.1.0",
+		"@types/lodash": "^4.14.138",
+		"jenkins-api-ts-typings": "^0.8.7",
+		"lodash": "^4.17.15",
 		"tmp": "^0.1.0",
 		"typed-rest-client": "^1.5.0",
 		"typeorm": "^0.2.19",
+		"typescript": "^3.3.1",
 		"unzipper": "^0.10.5",
-		"winston-decorator": "0.0.8"
+		"winston": "^3.2.1"
 	}
 }

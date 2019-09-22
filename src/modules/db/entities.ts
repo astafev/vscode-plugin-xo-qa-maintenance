@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class CiRun extends BaseEntity {
@@ -35,11 +35,13 @@ export class TestCase extends BaseEntity {
 
 @Entity()
 export class TestResult extends BaseEntity {
-
     @PrimaryGeneratedColumn()
+    uid?: string;
+
+    @Column('integer')
     ciRunId?: number;
 
-    @PrimaryGeneratedColumn()
+    @Column('integer')
     testCaseId?: number;
 
     @Column('text')

@@ -1,23 +1,25 @@
 import { Behaviors, getTestSuite } from "../jenkins/allure-analyze";
 import { IJenkinsBuild } from "jenkins-api-ts-typings";
-import * as sqlite from 'sqlite3';
 import { SqlUtil } from "./util";
 import { CiRun, TestCase, TestResult } from "./entities";
+import { createLogger } from 'winston';
 
 export class DbPopulator extends SqlUtil {
+    private log = createLogger();
+
     constructor(path: string) {
         super(path);
     }
 
-    public store(result: {
+    public store(content: {
         report: { behaviors: Behaviors },
         build: IJenkinsBuild
     }) {
         this.wrapInConnection(async () => {
-            let b = await this.storeCiRun(result.build);
-            console.log(b);
-            let a = await this.storeResults(result.report.behaviors, b);
-            console.log(a);
+            let runs = await this.storeCiRun(content.build);
+            this.log.debug(`Saved Runs ${JSON.stringify(runs)}`);
+            let results = await this.storeResults(content.report.behaviors, runs);
+            this.log.debug(`Saved ${results.length} Test Results`);
         });
     }
 
@@ -37,13 +39,14 @@ export class DbPopulator extends SqlUtil {
         console.log(testCases);
         return Promise.all(behaviors.children.map(ch => {
             let result = new TestResult();
+            result.uid = ch.uid;
             result.ciRunId = run.id;
             result.result = ch.status;
             result.testCaseId = ch.testCaseId;
-            let lastComment = this.getLastComment(result.testCaseId);
+            /*let lastComment = this.getLastComment(result.testCaseId);
             if (!!lastComment) {
                 result.comment = '[PREV] ' + lastComment;
-            }
+            }*/
             return result.save();
         }));
     }
