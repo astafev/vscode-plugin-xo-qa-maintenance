@@ -31,7 +31,8 @@
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile",
-		"test": "node ./out/test/runTest.js"
+		"test": "node ./out/test/runTest.js",
+		"postinstall": "install-app-deps"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
@@ -40,6 +41,8 @@
 		"@types/tmp": "^0.1.0",
 		"@types/unzipper": "^0.10.0",
 		"@types/vscode": "^1.38.0",
+		"electron-builder": "^21.2.0",
+		"electron-rebuild": "^1.8.6",
 		"glob": "^7.1.4",
 		"mocha": "^6.1.4",
 		"ts-loader": "^6.1.1",
@@ -49,14 +52,16 @@
 		"webpack-cli": "^3.3.9"
 	},
 	"dependencies": {
-		"@types/sqlite3": "^3.1.5",
-		"sqlite3": "^4.1.0",
+		"@types/better-sqlite3": "^5.4.0",
 		"@types/lodash": "^4.14.138",
+		"@types/sqlite3": "^3.1.4",
+		"better-sqlite3": "^5.4.3",
 		"jenkins-api-ts-typings": "^0.8.7",
 		"lodash": "^4.17.15",
+		"node-sqlite-purejs": "0.0.2",
+		"sqlite3": "^4.1.0",
 		"tmp": "^0.1.0",
 		"typed-rest-client": "^1.5.0",
-		"typeorm": "^0.2.19",
 		"typescript": "^3.3.1",
 		"unzipper": "^0.10.5",
 		"winston": "^3.2.1"

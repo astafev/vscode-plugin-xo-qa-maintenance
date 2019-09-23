@@ -1,7 +1,6 @@
 import { JenkinsAPI } from "../jenkins/jenkins";
 import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
-import { CiRun } from "../db/entities";
 
 export class IdeCommands {
 
@@ -18,7 +17,6 @@ export class IdeCommands {
     }
 
     public init() {
-        console.log(new CiRun());
     }
 
 
