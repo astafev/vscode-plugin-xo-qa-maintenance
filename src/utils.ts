@@ -29,3 +29,8 @@ export function parseRange(input: string) {
     }, [] as number[]);
     return _.uniq(arr);
 }
+
+// winston doesn't work in vs code https://github.com/winstonjs/winston/issues/1544
+export function makeLogger() {
+    return console;
+}

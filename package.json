@@ -14,6 +14,37 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": [
+			{
+				"title": "Crossover QA Maintenance Extension",
+				"properties": {
+					"xoQAMaintCIJobAnalyzer.jenkinsUser": {
+						"type": "string",
+						"default": "",
+						"description": "The username used for authentication in the Jenkins",
+						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.jenkinsToken": {
+						"type": "string",
+						"default": "",
+						"description": "The token used for authentication in the Jenkins",
+						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.db": {
+						"type": "string",
+						"default": "",
+						"description": "A path to a local SQLi DB for the project. Project-specific.",
+						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.jenkinsJob": {
+						"type": "string",
+						"default": "",
+						"description": "A path to a CI job. Example: http://jervis.aureacentral.com/job/Exinda/job/exinda_exos_jenkins/job/enq-qa-integration/job/exinda-exos-protractor-devqa-automation/. Project-specific.",
+						"scope": "resource"
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "xoQAMaintCIJobAnalyzer.pullTheBuilds",
@@ -63,7 +94,6 @@
 		"tmp": "^0.1.0",
 		"typed-rest-client": "^1.5.0",
 		"typescript": "^3.3.1",
-		"unzipper": "^0.10.5",
-		"winston": "^3.2.1"
+		"unzipper": "^0.10.5"
 	}
 }

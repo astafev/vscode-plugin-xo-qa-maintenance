@@ -1,10 +1,10 @@
 import { Behaviors, getTestSuite } from "../jenkins/allure-analyze";
 import { IJenkinsBuild } from "jenkins-api-ts-typings";
-import { createLogger } from 'winston';
 import { SqlUtil } from "./util";
+import { makeLogger } from "../../utils";
 
 export class DbPopulator extends SqlUtil {
-    private log = createLogger();
+    private log = makeLogger();
 
     constructor(path: string) {
         super(path);

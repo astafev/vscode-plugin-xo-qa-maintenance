@@ -1,24 +1,79 @@
 import { JenkinsAPI } from "../jenkins/jenkins";
 import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
+import { PREFIX } from "../../extension";
+import { makeLogger } from "../../utils";
 
 export class IdeCommands {
+    private _commonConfig?: {
+        jenkinsUser: string,
+        jenkinsToken: string
+    };
+    private _projectConfig?: {
+        db: string,
+        jenkinsJob: string
+    };
 
-    constructor(
-        private commonConfig: {
+    private log = makeLogger();
+
+    constructor() {
+    }
+
+    async init() {
+        await this.readConfiguration();
+    }
+
+    public async readConfiguration() {
+        this.log.info('Reading configuration');
+        const config = await vscode.workspace.getConfiguration(PREFIX, null);
+        this._projectConfig = {
+            db: config.get('db', ''),
+            jenkinsJob: config.get('jenkinsJob', '')
+        };
+
+        this._commonConfig = {
+            jenkinsUser: config.get('jenkinsUser', ''),
+            jenkinsToken: config.get('jenkinsToken', '')
+        };
+        this.log.debug(`The project config`, this._projectConfig);
+    }
+
+    public setConfig(
+        commonConfig: {
             jenkinsUser: string,
             jenkinsToken: string
         },
-        private projectConfig: {
+        projectConfig: {
             db: string,
             jenkinsJob: string
-        },
+        }
     ) {
+        this._commonConfig = commonConfig;
+        this._projectConfig = projectConfig;
     }
 
-    public init() {
+    private get projectConfig(): { db: string, jenkinsJob: string } {
+        if (this._projectConfig === undefined) {
+            throw this.error('Define the configuration');
+        }
+        return this._projectConfig;
     }
 
+    private get commonConfig(): { jenkinsUser: string, jenkinsToken: string } {
+        if (this._commonConfig === undefined) {
+            throw this.error('Define the configuration');
+        }
+        return this._commonConfig;
+    }
+
+    public error(errorMsg: string) {
+        vscode.window.showErrorMessage(errorMsg);
+        return new Error(errorMsg);
+    }
+
+    public information(message: string) {
+        vscode.window.showInformationMessage(message);
+    }
 
     public pullTheBuilds(buildIds: number[]) {
         let api = this.getApi();
@@ -28,8 +83,8 @@ export class IdeCommands {
             return promise.then(() => {
                 return this.pullTheBuild(id, api, db);
             });
-        }, Promise.resolve()).then(()=>{
-            
+        }, Promise.resolve()).then(() => {
+
         });
     }
 
@@ -57,9 +112,9 @@ export class IdeCommands {
         return api.pullAllureReport(buildId).then(result => {
             return _db.store(result);
         }).then(() => {
-            vscode.window.showInformationMessage(`Successfully pulled ${buildId} build`);
+            this.information(`Successfully pulled ${buildId} build`);
         }).catch(err => {
-            vscode.window.showErrorMessage(`Had an error pulling build ${buildId}:
+            this.error(`Had an error pulling build ${buildId}:
             ${err}`);
         });
     }

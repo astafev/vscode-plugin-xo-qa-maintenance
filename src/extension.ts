@@ -2,18 +2,18 @@ import * as vscode from 'vscode';
 import { IdeCommands } from './modules/ide/commands';
 import { parseRange } from './utils';
 
+export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
+
 export function activate(context: vscode.ExtensionContext) {
-	let commands = new IdeCommands({
-		jenkinsToken: '11e511b2463afa1d7ec883db743dad6ea9',
-		jenkinsUser: 'eastafev'
-	}, {
-		db: 'F:/data/vscode-extension-maintenance/responsetek.db',
-		jenkinsJob: 'http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/'
-	});
-	console.log('Starting');
-	//commands.init();
-	console.log('Started');
-	let disposable = vscode.commands.registerCommand('xoQAMaintCIJobAnalyzer.pullTheBuilds', async () => {
+	function newCommand(shortName: string, fn: (...args: any[]) => any, thisArg?: any) {
+		context.subscriptions.push(vscode.commands.registerCommand(`${PREFIX}.${shortName}`, fn));
+	}
+
+
+	const commands = new IdeCommands();
+	commands.init();
+
+	newCommand('pullTheBuilds', async () => {
 		let buildsInput = await vscode.window.showInputBox({
 			placeHolder: '10, 11, 12-15',
 			prompt: 'the range is inclusive'
@@ -26,8 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
 		commands.pullTheBuilds(builds);
 	});
 
-	context.subscriptions.push(disposable);
-
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		commands.readConfiguration();
+	}));
 
 }
 
