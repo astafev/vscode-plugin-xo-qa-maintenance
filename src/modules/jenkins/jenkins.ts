@@ -4,14 +4,19 @@ import { IJenkinsBuild } from 'jenkins-api-ts-typings';
 import * as tmp from 'tmp';
 import * as unzip from 'unzipper';
 import { AlluresReportAnalyzer } from './allure-analyze';
+import { makeLogger } from '../../utils';
+import { CIBuild, JenkinsBuild } from './dto';
 
 export class JenkinsAPI {
+    private static instance: JenkinsAPI;
     private static readonly ALLURE_REPORT_NAME = 'allure-report.zip';
 
     readonly rest: rm.RestClient;
 
-    constructor(private readonly token: string,
-        private readonly user: string,
+    private readonly log = makeLogger();
+
+    constructor(token: string,
+        user: string,
         private readonly prefix: string
     ) {
         this.rest = new rm.RestClient(
@@ -19,6 +24,11 @@ export class JenkinsAPI {
             prefix,
             [new BasicCredentialHandler(user, token)]
         );
+        JenkinsAPI.instance = this;
+    }
+
+    public static getInstance(): JenkinsAPI {
+        return JenkinsAPI.instance;
     }
 
     public async getBuildStatus(buildId: string | number): Promise<IJenkinsBuild> {
@@ -26,9 +36,13 @@ export class JenkinsAPI {
             buildId + '/api/json');
 
         if (res.statusCode !== 200) {
-            console.error(res.statusCode);
-            console.error(res.result);
-            throw new Error('Error!');
+            this.log.error(`Error getting build ${this.prefix}${buildId}`);
+            this.log.error(`${res.statusCode}: ${res.result}`);
+            if (res.statusCode === 404) {
+                throw new Error(`The build ${buildId} was not found.`);
+            } else {
+                throw new Error(`Error downloading build ${buildId}! Status: ${res.statusCode}`);
+            }
         }
 
         if (res.result === null) {
@@ -48,17 +62,16 @@ export class JenkinsAPI {
             throw new Error(`Unknown format of the artifacts array. ${build.url}
             ${JSON.stringify(build.artifacts)}`);
         }
-        console.log(`Checked build ${build.id}. It's ok`);
+        this.log.info(`Checked build ${build.id}. It's ok`);
     }
 
-    public async pullAllureReport(buildId: number) {
+    public async pullCiBuild(buildId: number): Promise<CIBuild> {
         let build = await this.getBuildStatus(buildId);
         this.checkBuild(build);
         let dir = await this.downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
-        return {
-            build: build,
-            report: new AlluresReportAnalyzer(dir).parse(),
-        };
+        return new JenkinsBuild(
+            build,
+            new AlluresReportAnalyzer(dir).parse());
     }
 
     private downloadAndUnzip(address: string): Promise<string> {
@@ -69,8 +82,8 @@ export class JenkinsAPI {
                     reject(err);
                 }
 
-                console.log('Directory: ', dir);
-                console.log(`Requesting ${address}`);
+                this.log.info('Directory: ', dir);
+                this.log.info(`Requesting ${address}`);
 
                 let stream = (await client.get(address)).message
                     .pipe(
@@ -84,5 +97,17 @@ export class JenkinsAPI {
                 stream.on('error', reject);
             });
         });
+    }
+
+    private async getAsString(address: string): Promise<string> {
+        this.log.debug(`Getting ${address}`);
+        const client = this.rest.client;
+
+        let response = (await client.get(address));
+        return response.readBody();
+    }
+
+    public getConsoleFull(buildId: number) {
+        return this.getAsString(`${this.prefix}${buildId}/timestamps/?appendLog`);
     }
 }

@@ -1,4 +1,0 @@
-F:\projects\crossover\automation-qa\vscode-plugin-xo-qa-maintenance\node_modules\sqlite3\lib\binding
-
-npm install sqlite3 --build-from-source
-

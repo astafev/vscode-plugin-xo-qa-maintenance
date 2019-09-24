@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { createLogger, transports } from 'winston';
 
 export function parseRange(input: string) {
     if (!input) {
@@ -30,7 +31,18 @@ export function parseRange(input: string) {
     return _.uniq(arr);
 }
 
-// winston doesn't work in vs code https://github.com/winstonjs/winston/issues/1544
 export function makeLogger() {
-    return console;
+    return createLogger({
+        transports: [
+            new transports.Console({
+                // winston has problems working with in vs code
+                // https://github.com/winstonjs/winston/issues/1544
+                // https://github.com/microsoft/vscode/issues/69959
+                log: (info, next) => {
+                    console.log(`${info.level.toUpperCase()} ${info.message}`);
+                    next();
+                }
+            }),
+        ],
+    });
 }

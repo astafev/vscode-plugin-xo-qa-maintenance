@@ -67,11 +67,13 @@ export class IdeCommands {
     }
 
     public error(errorMsg: string) {
+        this.log.error(errorMsg);
         vscode.window.showErrorMessage(errorMsg);
         return new Error(errorMsg);
     }
 
     public information(message: string) {
+        this.log.info(message);
         vscode.window.showInformationMessage(message);
     }
 
@@ -109,11 +111,13 @@ export class IdeCommands {
         } else {
             _db = db;
         }
-        return api.pullAllureReport(buildId).then(result => {
+        this.information(`Pulling build ${buildId}`);
+        return api.pullCiBuild(buildId).then(result => {
             return _db.store(result);
         }).then(() => {
             this.information(`Successfully pulled ${buildId} build`);
         }).catch(err => {
+            this.log.error(err);
             this.error(`Had an error pulling build ${buildId}:
             ${err}`);
         });

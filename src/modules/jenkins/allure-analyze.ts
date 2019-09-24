@@ -1,13 +1,42 @@
 import * as fs from 'fs';
-import { IJenkinsBuild } from 'jenkins-api-ts-typings';
+import { makeLogger } from '../../utils';
+
+export interface AllureReport {
+    behaviors: Behaviors;
+    parseLog(testCaseUid: string): string | undefined;
+}
 
 export class AlluresReportAnalyzer {
+    private log = makeLogger();
+
     constructor(private readonly dir: string) {
     }
 
-    public parse() {
+    public parse(): AllureReport {
+        let dir = this.dir;
+        let log = this.log;
         return {
-            behaviors: this.parseBehaviors()
+            behaviors: this.parseBehaviors(),
+            parseLog: function (uid: string): string | undefined {
+                try {
+                    let obj = JSON.parse(
+                        fs.readFileSync(`${dir}\\allure-report\\data\\test-cases\\${uid}.json`).toString()
+                    );
+                    if (!obj.testStage) {
+                        return undefined;
+                    }
+                    let steps = obj.testStage.steps;
+                    let prevStepStart = steps[0].time.start;
+                    return steps.reduce((log: string, step: any) => {
+                        let passed = (step.time.start - prevStepStart) / 1000;
+                        return `${log}\n+${passed}s ${step.name}`;
+                    }, '');
+                } catch (e) {
+                    log.error(`Error parsing ${uid}`, e);
+                    log.error(`Error reading ${dir}\\allure-report\\data\\test-cases\\${uid}.json`);
+                    return '';
+                }
+            }
         };
     }
 
@@ -30,15 +59,6 @@ export class AlluresReportAnalyzer {
     }
 }
 
-export function getTestSuite(build: IJenkinsBuild) {
-    let params: any = build.actions.find(action => {
-        return action._class === 'hudson.model.ParametersAction';
-    });
-    let suitesParam = params.parameters.find((param:any) => {
-        return param['name'] === 'SUITES';
-    });
-    return suitesParam['value'];
-}
 
 export interface Behaviors {
     uid: string;

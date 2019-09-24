@@ -1,7 +1,7 @@
-import { Behaviors, getTestSuite } from "../jenkins/allure-analyze";
-import { IJenkinsBuild } from "jenkins-api-ts-typings";
+import { Behaviors, AllureReport } from "../jenkins/allure-analyze";
 import { SqlUtil } from "./util";
 import { makeLogger } from "../../utils";
+import { CIBuild } from "../jenkins/dto";
 
 export class DbPopulator extends SqlUtil {
     private log = makeLogger();
@@ -10,42 +10,51 @@ export class DbPopulator extends SqlUtil {
         super(path);
     }
 
-    public async store(content: {
-        report: { behaviors: Behaviors },
-        build: IJenkinsBuild
-    }) {
+    public async store(content: CIBuild) {
+        this.log.info(`Saving build ${content.getId()} to the db.`);
         //this.db.serialize();
-        this.storeCiRun(content.build);
-        this.storeResults(content.report.behaviors, content.build.number);
+        await this.storeCiRun(content);
+        await this.storeResults(content.getAllureReport(), content.getId());
     }
 
-    private storeCiRun(build: IJenkinsBuild) {
-        let stmt = this.db.prepare('INSERT OR IGNORE INTO ci_run (id, start_time, duration, result, suite) VALUES (?, ?, ?, ?, ?)');
+    private async storeCiRun(build: CIBuild) {
+        let stmt = this.db.prepare(`INSERT OR IGNORE INTO ci_run
+         (id, start_time, duration, result, suite, 
+            console, branch, revision)
+         VALUES (?, ?, ?, ?, ?,
+            ?, ?, ?)`);
 
-        stmt.run(build.number,
-            build.timestamp,
-            build.duration,
-            build.result,
-            getTestSuite(build));
+        stmt.run(build.getId(),
+            build.getTimestamp(),
+            build.getDuration(),
+            build.getResult(),
+            build.getTestSuite(),
+            await build.getConsoleFull(),
+            build.getBranch(),
+            build.getRevision());
         //return stmt.finalize();
     }
 
 
-    private async storeResults(behaviors: Behaviors, buildId: number) {
-        await this.storeTestCases(behaviors);
+    private async storeResults(report: AllureReport, buildId: number) {
+        await this.storeTestCases(report.behaviors);
 
         let stmt = this.db.prepare(`INSERT OR IGNORE INTO test_result
-        (uid, ci_run_id, result, comment)
+        (uid, ci_run_id, result, console)
         VALUES
         (?, ?, ?, ?)`);
-        behaviors.children.forEach(ch => {
-            stmt.run(ch.uid, buildId, ch.status, ch.testCaseId);
+        report.behaviors.children.forEach(ch => {
+            stmt.run(ch.uid,
+                buildId,
+                ch.status,
+                report.parseLog(ch.uid));
         });
         //stmt.finalize();
     }
 
     private storeTestCases(behaviors: Behaviors) {
-        let stmt = this.db.prepare('INSERT OR IGNORE INTO test_case (id, title) VALUES (?, ?)');
+        let stmt = this.db.prepare(`INSERT OR IGNORE INTO test_case
+         (id, title) VALUES (?, ?)`);
         behaviors.children.forEach(ch => {
             stmt.run(ch.testCaseId, ch.name);
         });
