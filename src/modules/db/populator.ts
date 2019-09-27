@@ -1,4 +1,4 @@
-import { Behaviors, AllureReport } from "../jenkins/allure-analyze";
+import { Behaviors, AllureReport, BehaviorChild } from "../jenkins/allure-analyze";
 import { SqlUtil } from "./util";
 import { makeLogger } from "../../utils";
 import { CIBuild } from "../jenkins/dto";
@@ -40,14 +40,18 @@ export class DbPopulator extends SqlUtil {
         await this.storeTestCases(report.behaviors);
 
         let stmt = this.db.prepare(`INSERT OR IGNORE INTO test_result
-        (uid, ci_run_id, result, console)
+        (uid, ci_run_id, test_case_id, result, console, start_time, duration)
         VALUES
-        (?, ?, ?, ?)`);
-        report.behaviors.children.forEach(ch => {
-            stmt.run(ch.uid,
+        (?, ?, ?, ?, ?, ?, ?)`);
+        report.behaviors.children.forEach((behavior: BehaviorChild) => {
+            stmt.run(behavior.uid,
                 buildId,
-                ch.status,
-                report.parseLog(ch.uid));
+                behavior.testCaseId,
+                behavior.status,
+                report.parseLog(behavior.uid),
+                behavior.time.start,
+                behavior.time.duration,
+            );
         });
         //stmt.finalize();
     }

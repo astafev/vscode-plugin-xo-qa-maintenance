@@ -1,0 +1,138 @@
+import * as ts from 'typescript';
+import * as vscode from 'vscode';
+import * as _ from 'lodash';
+import { TextDocument, Selection } from "vscode";
+import { IdTitle } from "../dto/idTitle";
+import { makeLogger } from '../../utils';
+import { throws } from 'assert';
+
+interface ItFunction {
+    title: string;
+    body: ts.Block;
+    position: number;
+    line: number;
+    endLine: number;
+}
+
+export class TextUtil {
+    private log = makeLogger();
+    private _its?: ItFunction[];
+    //private _sf: ts.SourceFile;
+    constructor(private document: TextDocument) {
+    }
+
+
+    private describeOrIt(itOrDescribe: ts.ExpressionStatement, document: ts.SourceFile): ItFunction {
+        let _callExpression = (itOrDescribe as ts.ExpressionStatement).expression;
+        if (_callExpression.kind !== ts.SyntaxKind.CallExpression) {
+            throw new Error(`Not a call expression. ${_callExpression.kind}`);
+        }
+        let callExpression = (_callExpression as ts.CallExpression);
+        if (callExpression.arguments.length !== 2) {
+            throw new Error(`Not 2 arguments. ${callExpression.arguments.length}`);
+        }
+        let fnName = (callExpression.expression as ts.Identifier).escapedText;
+        if (fnName !== "describe" && fnName !== "it") {
+            throw new Error(`Unknown fn name. ${fnName}`);
+        }
+        let name = '';
+        if (callExpression.arguments[0].kind === ts.SyntaxKind.PropertyAccessExpression) {
+            let propertyAccess = (callExpression.arguments[0] as ts.PropertyAccessExpression);
+            name = `${(propertyAccess.expression as ts.Identifier).text}.${(propertyAccess.name as ts.Identifier).text}`;
+        } else if (true) {
+            name = (callExpression.arguments[0] as ts.StringLiteral).text;
+        }
+        return {
+            title: name,
+            body: (callExpression.arguments[1] as ts.ArrowFunction).body as ts.Block,
+            position: callExpression.pos,
+            line: document.getLineAndCharacterOfPosition(callExpression.pos).line,
+            endLine: document.getLineAndCharacterOfPosition(callExpression.end).line
+        };
+    }
+
+    private getDom(): ts.SourceFile {
+        return ts.createSourceFile(
+            this.document.uri.toString(),
+            this.document.getText(),
+            ts.ScriptTarget.Latest);
+    }
+
+    private e2eBody(document: ts.SourceFile): ts.Block {
+        for (let node of document.getChildren()[0].getChildren()) {
+            if (node.kind !== ts.SyntaxKind.ExpressionStatement) {
+                continue;
+            }
+            try {
+                return this.describeOrIt(node as ts.ExpressionStatement, document).body;
+            } catch (e) {
+                continue;
+            }
+        }
+        throw new Error(`Can't parse the file. Do you have not a e2e file open?`);
+    }
+
+    private parse() {
+
+        let document = this.getDom();
+        let describe = this.e2eBody(document);
+        let cases = describe.statements.filter(node => {
+            return node.kind === ts.SyntaxKind.ExpressionStatement;
+        });
+        let _its: ItFunction[] = cases.map(node => {
+            try {
+                return this.describeOrIt(node as ts.ExpressionStatement, document);
+            } catch (e) {
+                // beforeEach/beforeAll
+                return null;
+            }
+        }).filter(el => {
+            return el !== null;
+        }) as ItFunction[];
+        this._its = _its;
+        return _its;
+    }
+
+    private _getTestCase(selection: Selection): ItFunction {
+
+        if (this._its === undefined) {
+            this._its = this.parse();
+        }
+        const line = selection.active.line;
+        for (let it of this._its) {
+            if (line >= it.line - 1 && line <= it.endLine) {
+                return it;
+            }
+        }
+        throw new Error('No function found');
+    }
+
+    public static parseTestCaseIdFromTitle(title: string) {
+        let result = new RegExp("\w*\\[(\\d+)]").exec(title);
+        if (result === null) {
+            throw new Error(`Unknown test case name format: ${title}`);
+        }
+        return Number.parseInt(result[1]);
+    }
+
+    public getTestCase(selection: Selection): IdTitle {
+
+        let it = this._getTestCase(selection);
+
+        // TODO
+        // https://github.com/vscode-box/vscode-ast
+        return {
+            id: TextUtil.parseTestCaseIdFromTitle(it.title),
+            title: it.title
+        };
+    }
+}
+
+
+class E2eParser {
+    constructor(private dom: ts.SourceFile) {
+
+    }
+
+
+}

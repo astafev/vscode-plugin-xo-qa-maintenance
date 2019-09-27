@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:xoQAMaintCIJobAnalyzer.pullTheBuilds"
+		"onCommand:xoQAMaintCIJobAnalyzer.pullTheBuilds",
+		"onCommand:xoQAMaintCIJobAnalyzer.showTCInfo"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -51,11 +52,24 @@
 				"title": "XO.Maint: Pull CI builds"
 			},
 			{
+				"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
+				"title": "XO.Maint: Show TC Info"
+			},
+			{
 				"command": "xoQAMaintCIJobAnalyzer.doCoolStuff",
 				"title": "do cool stuff",
 				"when": "editorLangId == typescript, https://code.visualstudio.com/docs/getstarted/keybindings#_when-clause-contexts"
 			}
-		]
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
+					"when": "editorLangId == typescript",
+					"group": "xoQAMaint@1"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -68,6 +82,7 @@
 	"devDependencies": {
 		"@types/better-sqlite3": "^5.4.0",
 		"@types/glob": "^7.1.1",
+		"@types/humanize-duration": "^3.18.0",
 		"@types/lodash": "^4.14.138",
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^10.12.21",
@@ -87,6 +102,7 @@
 	},
 	"dependencies": {
 		"better-sqlite3": "^5.4.3",
+		"humanize-duration": "^3.21.0",
 		"jenkins-api-ts-typings": "^0.8.7",
 		"lodash": "^4.17.15",
 		"node-sqlite-purejs": "0.0.2",

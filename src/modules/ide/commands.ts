@@ -3,6 +3,9 @@ import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
 import { PREFIX } from "../../extension";
 import { makeLogger } from "../../utils";
+import { RunDetailsWebView } from "../views/run-details-view";
+import { TextUtil } from "./text-util";
+import { InfoProvider } from "../db/info-provider";
 
 export class IdeCommands {
     private _commonConfig?: {
@@ -79,7 +82,7 @@ export class IdeCommands {
 
     public pullTheBuilds(buildIds: number[]) {
         let api = this.getApi();
-        let db = this.getDb();
+        let db = this.getDbPopulator();
         //vscode.window.
         return buildIds.reduce((promise, id) => {
             return promise.then(() => {
@@ -96,8 +99,12 @@ export class IdeCommands {
             this.projectConfig.jenkinsJob);
     }
 
-    private getDb() {
+    private getDbPopulator() {
         return new DbPopulator(this.projectConfig.db);
+    }
+
+    private getDbInfoProvider() {
+        return new InfoProvider(this.projectConfig.db);
     }
 
     public pullTheBuild(buildId: number, api?: JenkinsAPI, db?: DbPopulator) {
@@ -107,7 +114,7 @@ export class IdeCommands {
 
         let _db: DbPopulator;
         if (db === undefined) {
-            db = this.getDb();
+            db = this.getDbPopulator();
         } else {
             _db = db;
         }
@@ -121,5 +128,19 @@ export class IdeCommands {
             this.error(`Had an error pulling build ${buildId}:
             ${err}`);
         });
+    }
+
+    public createAWebView(editor: vscode.TextEditor) {
+        let idTitle = new TextUtil(editor.document).getTestCase(editor.selection);
+        const panel = vscode.window.createWebviewPanel(
+            'testCaseDetails',
+            `${idTitle.id} "${idTitle.title}"`,
+            vscode.ViewColumn.Beside,
+            {}
+        );
+
+        panel.webview.html = new RunDetailsWebView(
+            this.getDbInfoProvider().getTestCaseRunDetails(idTitle)
+        ).generateHtml();
     }
 }

@@ -9,7 +9,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Launch Program",
-			"program": "${workspaceFolder}/src/modules/test.ts",
+			"program": "${workspaceFolder}/src/test.ts",
 			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"outputCapture": "std",
 			"preLaunchTask": "npm: watch"

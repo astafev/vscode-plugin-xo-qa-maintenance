@@ -26,8 +26,14 @@ export function activate(context: vscode.ExtensionContext) {
 		commands.pullTheBuilds(builds);
 	});
 
-	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
 		commands.readConfiguration();
+	}));
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showTCInfo`, (editor, edit) => {
+		console.log(editor.document.uri);
+		console.log(editor.selection.active);
+		console.log(editor);
+		commands.createAWebView(editor);
 	}));
 
 }
