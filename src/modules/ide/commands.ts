@@ -144,7 +144,7 @@ export class IdeCommands {
 
         try {
             let details = this.getDbInfoProvider().getTestCaseRunDetails(idTitle);
-            panel.webview.html = new RunDetailsWebView(details).generateHtml();
+            panel.webview.html = new RunDetailsWebView(details).generateHtml(panel.webview);
             panel.webview.onDidReceiveMessage(message => {
                 this.log.info(`Received a message. ${JSON.stringify(message)}`);
                 switch (message.command) {
@@ -155,7 +155,7 @@ export class IdeCommands {
             });
         } catch (e) {
             console.log(e);
-            panel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml();
+            panel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml(panel.webview);
         }
     }
 }

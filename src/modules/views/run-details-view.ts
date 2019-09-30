@@ -3,6 +3,8 @@ import * as _ from "lodash";
 import { AbstractWebView } from "./abstract-view";
 import humanizeDuration = require("humanize-duration");
 import { makeLogger } from "../../utils";
+import * as vscode from 'vscode';
+let htmlencode = require('htmlencode').htmlEncode;
 
 export class RunDetailsWebView extends AbstractWebView {
     private log = makeLogger();
@@ -10,7 +12,7 @@ export class RunDetailsWebView extends AbstractWebView {
         super();
     }
 
-    public generateHtml() {
+    public generateHtml(webview: vscode.Webview) {
         if (this.error !== undefined) {
             return this.fallBack(this.error);
         }
@@ -20,7 +22,8 @@ export class RunDetailsWebView extends AbstractWebView {
         const lastRun = this.details.runs[0];
         const nonce = this.getNonce();
         this.log.info(`Showing details view for ${this.details.id}`);
-        this.log.debug(JSON.stringify(this.details));
+        // this.log.debug(JSON.stringify(this.details));
+        // TODO set up CSP. The config suggested in the documentation makes styles not working
         return `
 <!DOCTYPE html>
 <html lang="en">
@@ -28,7 +31,6 @@ export class RunDetailsWebView extends AbstractWebView {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none';">
     <title>${this.details.id}."${this.details.title}"</title>
 </head>
 
@@ -37,22 +39,21 @@ export class RunDetailsWebView extends AbstractWebView {
 
     <textarea id="commentInput" placeholder="Comment..." 
     style="min-width: 50%; min-height: 100px"
-    >${this.details.lastComment || ''}</textarea>
+    >${htmlencode(this.details.lastComment || '')}</textarea>
     <p>
         <button onclick="saveComment()">Update comment</button>    
         <span id="successMsg" style="color: limegreen; display: none;">Successfully saved</span>
         <span id="errorMsg" style="color: red; display: none;">Error!</span>
     </p>
     <hr>
+    <h2 style="text-align: center; color: ${lastRun.result === 'passed' ? 'limegreen' : 'red'};">Status: ${htmlencode(lastRun.result)}</h2>
 
     <p>
         Duration: ${humanizeDuration(lastRun.duration)}
     </p>
     <p>
         <h3>Execution log</h3>
-        <pre style="margin-left: 3%">
-        ${lastRun.console}
-        </pre>
+        <pre>${htmlencode(htmlencode(lastRun.console))}</pre>
     </p>
 
     <script nonce="${nonce}">
