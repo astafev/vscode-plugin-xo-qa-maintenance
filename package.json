@@ -102,6 +102,7 @@
 	},
 	"dependencies": {
 		"better-sqlite3": "^5.4.3",
+		"htmlencode": "0.0.4",
 		"humanize-duration": "^3.21.0",
 		"jenkins-api-ts-typings": "^0.8.7",
 		"lodash": "^4.17.15",

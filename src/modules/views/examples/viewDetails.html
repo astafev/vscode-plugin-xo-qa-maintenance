@@ -10,11 +10,17 @@
 <body>
     <h1>The title of the test case [123456]</h1>
 
-    <textarea name="comment" placeholder="Comment..." style="min-width: 50%; min-height: 100px">
+    <textarea name="comment" placeholder="Comment..." style="min-width: 50%; min-height: 100px" id="commentInput">
         The test case if failing because of bla-bla-bla.
 
         Supposed to be a simple comment without any rich features. Should I make it 
     </textarea>
+    <p>
+        <button onclick="saveComment()">Update comment</button>
+        <span id="successMsg" style="color: limegreen; display: none;">Successfully saved</span>
+        <span id="errorMsg" style="color: red; display: none;">Error!</span>
+    </p>
+    <hr>
     <p>
         Duration: 500ms
     </p>
@@ -36,6 +42,15 @@
 +120.15s - *Sub-Verification* - Login page for administration interface is displayed.
         </pre>
     </p>
+    <script>
+        const vscode = {
+            postMessage: console.log
+        };
+        function saveComment() {
+            let comment = document.getElementById('commentInput').value;
+            vscode.postMessage({ command: 'commentUpdate', text: comment.trim() });
+        }
+    </script>
 </body>
 
 </html>

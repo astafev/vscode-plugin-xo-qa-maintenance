@@ -127,12 +127,3 @@ export class TextUtil {
         };
     }
 }
-
-
-class E2eParser {
-    constructor(private dom: ts.SourceFile) {
-
-    }
-
-
-}

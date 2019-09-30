@@ -12,10 +12,20 @@ export abstract class AbstractWebView {
 </head>
 
 <body>
-    <h1>${error}</h1>
+    <h2><i style="color:red; margin-top:30%">${error}</i></h1>
 </body>
 
 </html>
 `;
     }
+
+    public getNonce() {
+        let text = '';
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    }
+
 }

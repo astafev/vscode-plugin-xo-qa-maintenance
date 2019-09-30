@@ -62,23 +62,10 @@ export class DbPopulator extends SqlUtil {
         behaviors.children.forEach(ch => {
             stmt.run(ch.testCaseId, ch.name);
         });
-        //stmt.finalize();
     }
-    /*
-        private async getLastComment(tcId: number): Promise<String> {
-            if (!this.connection) {
-                throw new Error();
-            }
-            let result = await this.connection.createQueryBuilder(TestResult, 'test_result')
-                .where('testCaseId = :id', { id: tcId })
-                .andWhere('comment IS NOT NULL')
-                // .orderBy('ORDER BY ciRunId DESC LIMIT 1')
-                .getOne();
-    
-            if (!result || !result.comment) {
-                return '';
-            }
-            return result.comment;
-        }
-    */
+
+    public updateComment(uid: string, comment: string) {
+        let stmt = this.db.prepare(`UPDATE test_result SET user_comment = ? WHERE uid = ?`);
+        stmt.run(comment, uid);
+    }
 }

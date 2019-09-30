@@ -6,6 +6,7 @@ import { makeLogger } from "../../utils";
 import { RunDetailsWebView } from "../views/run-details-view";
 import { TextUtil } from "./text-util";
 import { InfoProvider } from "../db/info-provider";
+import { TestCaseDetails } from "../dto/testCaseDetails";
 
 export class IdeCommands {
     private _commonConfig?: {
@@ -136,11 +137,25 @@ export class IdeCommands {
             'testCaseDetails',
             `${idTitle.id} "${idTitle.title}"`,
             vscode.ViewColumn.Beside,
-            {}
+            {
+                enableScripts: true
+            }
         );
 
-        panel.webview.html = new RunDetailsWebView(
-            this.getDbInfoProvider().getTestCaseRunDetails(idTitle)
-        ).generateHtml();
+        try {
+            let details = this.getDbInfoProvider().getTestCaseRunDetails(idTitle);
+            panel.webview.html = new RunDetailsWebView(details).generateHtml();
+            panel.webview.onDidReceiveMessage(message => {
+                this.log.info(`Received a message. ${JSON.stringify(message)}`);
+                switch (message.command) {
+                    case 'commentUpdate':
+                        this.getDbPopulator().updateComment(message.uid, message.text);
+                        return;
+                }
+            });
+        } catch (e) {
+            console.log(e);
+            panel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml();
+        }
     }
 }

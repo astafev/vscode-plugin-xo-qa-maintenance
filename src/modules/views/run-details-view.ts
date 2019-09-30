@@ -2,44 +2,89 @@ import { TestCaseDetails } from "../dto/testCaseDetails";
 import * as _ from "lodash";
 import { AbstractWebView } from "./abstract-view";
 import humanizeDuration = require("humanize-duration");
+import { makeLogger } from "../../utils";
 
 export class RunDetailsWebView extends AbstractWebView {
-    constructor(private details: TestCaseDetails) {
+    private log = makeLogger();
+    constructor(private details: TestCaseDetails, private error?: string) {
         super();
     }
 
     public generateHtml() {
-        if (_.isEmpty(this.details.runs)) {
+        if (this.error !== undefined) {
+            return this.fallBack(this.error);
+        }
+        if (_.isEmpty(this.details) || _.isEmpty(this.details.runs)) {
             return this.fallBack(`No builds pulled from the CI found.`);
         }
         const lastRun = this.details.runs[0];
-        return `<!DOCTYPE html>
-        <html lang="en">
-        
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${this.details.id}."${this.details.title}"</title>
-        </head>
-        
-        <body>
-            <h1>${this.details.title}</h1>
-        
-            <textarea name="comment" placeholder="Comment..." style="min-width: 50%; min-height: 100px">
-                ${!this.details.lastComment ? '' : this.details.lastComment}
-            </textarea>
-            <p>
-                Duration: ${humanizeDuration(lastRun.duration)}
-            </p>
-            <p>
-                <h3>Execution log</h3>
-                <pre style="margin-left: 3%">
-                ${lastRun.console}
-                </pre>
-            </p>
-        </body>
-        
-        </html>`;
+        const nonce = this.getNonce();
+        this.log.info(`Showing details view for ${this.details.id}`);
+        this.log.debug(JSON.stringify(this.details));
+        return `
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none';">
+    <title>${this.details.id}."${this.details.title}"</title>
+</head>
+
+<body>
+    <h1>${this.details.title}</h1>
+
+    <textarea id="commentInput" placeholder="Comment..." 
+    style="min-width: 50%; min-height: 100px"
+    >${this.details.lastComment || ''}</textarea>
+    <p>
+        <button onclick="saveComment()">Update comment</button>    
+        <span id="successMsg" style="color: limegreen; display: none;">Successfully saved</span>
+        <span id="errorMsg" style="color: red; display: none;">Error!</span>
+    </p>
+    <hr>
+
+    <p>
+        Duration: ${humanizeDuration(lastRun.duration)}
+    </p>
+    <p>
+        <h3>Execution log</h3>
+        <pre style="margin-left: 3%">
+        ${lastRun.console}
+        </pre>
+    </p>
+
+    <script nonce="${nonce}">
+        const vscode = acquireVsCodeApi();
+    
+        function updateComment_after(result) {
+            document.getElementById('inProcessMsg').style.display = 'none';
+            let el;
+            if (result) {
+                el = document.getElementById('successMsg');
+            } else {
+                el = document.getElementById('errorMsg');
+            }
+            el.style.display = 'inline';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 1500);
+        }
+        function saveComment() {
+            let comment = document.getElementById('commentInput').value;
+            document.getElementById('inProcessMsg').style.display = 'inline';
+            try{
+                let result = vscode.postMessage({ command: 'commentUpdate', text: comment.trim(), uid: '${lastRun.uid}' });
+                updateComment_after(true);
+            } catch(e) {
+                updateComment_after(false);
+            }
+        }
+    </script>
+</body>
+
+</html>`;
     }
 
 }
