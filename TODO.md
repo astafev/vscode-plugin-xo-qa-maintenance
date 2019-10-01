@@ -5,7 +5,7 @@ Done:
 - [x] analyze the source code
 
 next:
-- [ ] view "detailed": test case results - last console, + 5 last builds with comments, + last not empty comment
+- [~] view "detailed": test case results - last console, + 5 last builds with comments, + last not empty comment
 
 - [ ] save screenshots
 - [ ] view "detailed": add screenshots to the detailed view.

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IdeCommands } from './modules/ide/commands';
-import { parseRange } from './utils';
+import { parseRange, makeLogger } from './utils';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -30,10 +30,22 @@ export function activate(context: vscode.ExtensionContext) {
 		commands.readConfiguration();
 	}));
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showTCInfo`, (editor, edit) => {
-		commands.createAWebView(editor);
+		try {
+			commands.createAWebView(editor);
+		} catch (e) {
+			unhandledError(e);
+		}
 	}));
 
+	function unhandledError(e: any) {
+		const log = makeLogger();
+		log.error(`Error occured! Uncaught exception. `, e);
+		commands.error(`Uncaught exception. ${e}`);
+	}
+	process.on('uncaughtException', unhandledError);
+	process.on('unhandledRejection', unhandledError);
 }
+
 
 // this method is called when your extension is deactivated
 export function deactivate() { }

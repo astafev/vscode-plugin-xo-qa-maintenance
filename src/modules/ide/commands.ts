@@ -7,6 +7,7 @@ import { RunDetailsWebView } from "../views/run-details-view";
 import { TextUtil } from "./text-util";
 import { InfoProvider } from "../db/info-provider";
 import { TestCaseDetails } from "../dto/testCaseDetails";
+import { IdTitle } from "../dto/idTitle";
 
 export class IdeCommands {
     private _commonConfig?: {
@@ -132,7 +133,15 @@ export class IdeCommands {
     }
 
     public createAWebView(editor: vscode.TextEditor) {
-        let idTitle = new TextUtil(editor.document).getTestCase(editor.selection);
+        this.log.info(`Generating a web view`);
+        let idTitle: IdTitle;
+        try {
+            idTitle = new TextUtil(editor.document).getTestCase(editor.selection);
+        } catch (e) {
+            this.error(`Can't parse the test file.`);
+            return;
+        }
+        this.log.debug(`id = ${idTitle.id}, title = ${idTitle.title}`);
         const panel = vscode.window.createWebviewPanel(
             'testCaseDetails',
             `${idTitle.id} "${idTitle.title}"`,

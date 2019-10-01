@@ -21,8 +21,13 @@ export class TextUtil {
     constructor(private document: TextDocument) {
     }
 
-
     private describeOrIt(itOrDescribe: ts.ExpressionStatement, document: ts.SourceFile): ItFunction {
+        function getStringLiteralValue(node: ts.Node) {
+            if(node.kind !== ts.SyntaxKind.StringLiteral) {
+                throw new Error(`Not a string literal. ${node}`);
+            }
+            return (node as ts.StringLiteral).text;
+        }
         let _callExpression = (itOrDescribe as ts.ExpressionStatement).expression;
         if (_callExpression.kind !== ts.SyntaxKind.CallExpression) {
             throw new Error(`Not a call expression. ${_callExpression.kind}`);
@@ -36,11 +41,23 @@ export class TextUtil {
             throw new Error(`Unknown fn name. ${fnName}`);
         }
         let name = '';
-        if (callExpression.arguments[0].kind === ts.SyntaxKind.PropertyAccessExpression) {
-            let propertyAccess = (callExpression.arguments[0] as ts.PropertyAccessExpression);
-            name = `${(propertyAccess.expression as ts.Identifier).text}.${(propertyAccess.name as ts.Identifier).text}`;
-        } else if (true) {
-            name = (callExpression.arguments[0] as ts.StringLiteral).text;
+        let arg0 = callExpression.arguments[0];
+        switch (arg0.kind) {
+    
+            case ts.SyntaxKind.PropertyAccessExpression:
+                // "describe" method
+                let propertyAccess = arg0 as ts.PropertyAccessExpression;
+                name = `${(propertyAccess.expression as ts.Identifier).text}.${(propertyAccess.name as ts.Identifier).text}`;
+                break;
+            case ts.SyntaxKind.BinaryExpression:
+                // name is split into 2 lines
+                name = getStringLiteralValue((arg0 as ts.BinaryExpression).left) + getStringLiteralValue((arg0 as ts.BinaryExpression).right);
+                break;
+            case ts.SyntaxKind.StringLiteral:
+                // typical case for "it" method
+                name = getStringLiteralValue(arg0);
+                break;
+            default:
         }
         return {
             title: name,
@@ -119,8 +136,6 @@ export class TextUtil {
 
         let it = this._getTestCase(selection);
 
-        // TODO
-        // https://github.com/vscode-box/vscode-ast
         return {
             id: TextUtil.parseTestCaseIdFromTitle(it.title),
             title: it.title

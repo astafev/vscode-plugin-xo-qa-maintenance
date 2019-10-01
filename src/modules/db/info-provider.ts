@@ -33,6 +33,7 @@ export class InfoProvider extends SqlUtil {
         return results.map(val => {
             return {
                 uid: val.uid,
+                ci_run_id: val.ci_run_id,
                 result: val.result as string,
                 startTime: new Date(val.start_time as number),
                 duration: val.duration as number,
