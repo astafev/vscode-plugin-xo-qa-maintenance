@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
 import { IdeCommands } from './modules/ide/commands';
 import { parseRange, makeLogger } from './utils';
+import { TreeView } from './modules/ide/tree-view/treeView';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
 export function activate(context: vscode.ExtensionContext) {
-	function newCommand(shortName: string, fn: (...args: any[]) => any, thisArg?: any) {
+	function newCommand(shortName: string, fn: (...args: any[]) => any, _thisArg?: any) {
 		context.subscriptions.push(vscode.commands.registerCommand(`${PREFIX}.${shortName}`, fn));
 	}
-
+	const log = makeLogger();
 
 	const commands = new IdeCommands();
 	commands.init();
@@ -37,8 +38,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
+	log.debug('Creating a tree view');
+	vscode.window.registerTreeDataProvider('testsExplorer', new TreeView());
+
 	function unhandledError(e: any) {
-		const log = makeLogger();
 		log.error(`Error occured! Uncaught exception. `, e);
 		commands.error(`Uncaught exception. ${e}`);
 	}

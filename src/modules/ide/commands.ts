@@ -3,7 +3,7 @@ import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
 import { PREFIX } from "../../extension";
 import { makeLogger } from "../../utils";
-import { RunDetailsWebView } from "../views/run-details-view";
+import { RunDetailsWebView } from "../webviews/run-details-view";
 import { TextUtil } from "./text-util";
 import { InfoProvider } from "../db/info-provider";
 import { TestCaseDetails } from "../dto/testCaseDetails";

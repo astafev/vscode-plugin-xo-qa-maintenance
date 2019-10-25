@@ -1,6 +1,6 @@
 import { TestCaseDetails } from "../dto/testCaseDetails";
 import * as _ from "lodash";
-import { AbstractWebView } from "./abstract-view";
+import { AbstractWebView } from "./abstract-web-view";
 import humanizeDuration = require("humanize-duration");
 import { makeLogger } from "../../utils";
 import * as vscode from 'vscode';

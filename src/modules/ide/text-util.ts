@@ -1,10 +1,8 @@
 import * as ts from 'typescript';
-import * as vscode from 'vscode';
 import * as _ from 'lodash';
 import { TextDocument, Selection } from "vscode";
 import { IdTitle } from "../dto/idTitle";
 import { makeLogger } from '../../utils';
-import { throws } from 'assert';
 
 interface ItFunction {
     title: string;
@@ -17,7 +15,6 @@ interface ItFunction {
 export class TextUtil {
     private log = makeLogger();
     private _its?: ItFunction[];
-    //private _sf: ts.SourceFile;
     constructor(private document: TextDocument) {
     }
 

@@ -1,4 +1,22 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import { promisify } from 'util';
+import { utils } from 'mocha';
+
+interface TestCaseTreeItem {
+    id: number;
+    name: string;
+}
+
+class FileItem {
+    constructor(private readonly uri: vscode.Uri,
+        type: vscode.FileType) {
+    }
+
+    public isDirectory() {
+        return ;
+    }
+}
 
 /**
  * https://github.com/vscode-box/vscode-ast/blob/master/src/astExplorer.ts

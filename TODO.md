@@ -5,6 +5,7 @@ Done:
 - [x] analyze the source code
 
 next:
+- [ ] tree view. https://code.visualstudio.com/api/extension-guides/tree-view
 - [~] view "detailed": test case results - last console, + 5 last builds with comments, + last not empty comment
 
 - [ ] save screenshots
@@ -23,7 +24,6 @@ later:
 - [ ] idea: watch a build, pull when it's done
 - [ ] add support for TeamCity
 - [ ] status view: show the internal information like ci_run table
-- [ ] tree view. https://code.visualstudio.com/api/extension-guides/tree-view
 
 possible bugs (not important at the moment):
 - [ ] check that the tmp directory is deleted fine

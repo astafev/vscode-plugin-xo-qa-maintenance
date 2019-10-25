@@ -69,6 +69,23 @@
 					"group": "xoQAMaint@1"
 				}
 			]
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "tests-explorer",
+					"title": "Tests Explorer",
+					"icon": "media/dep.svg"
+				}
+			]
+		},
+		"views": {
+			"tests-explorer": [
+				{
+					"id": "testsExplorer",
+					"name": "Tests Explorer"
+				}
+			]
 		}
 	},
 	"scripts": {
@@ -101,12 +118,16 @@
 		"webpack-cli": "^3.3.9"
 	},
 	"dependencies": {
+		"@types/mkdirp": "^0.5.2",
+		"@types/rimraf": "^2.0.3",
 		"better-sqlite3": "^5.4.3",
 		"htmlencode": "0.0.4",
 		"humanize-duration": "^3.21.0",
 		"jenkins-api-ts-typings": "^0.8.7",
 		"lodash": "^4.17.15",
+		"mkdirp": "^0.5.1",
 		"node-sqlite-purejs": "0.0.2",
+		"rimraf": "^3.0.0",
 		"tmp": "^0.1.0",
 		"typed-rest-client": "^1.5.0",
 		"typescript": "^3.3.1",
