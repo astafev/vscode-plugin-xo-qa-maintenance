@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 import * as _ from 'lodash';
-import { TextDocument, Selection } from "vscode";
+import { TextDocument, Selection, TextDocumentContentProvider } from "vscode";
 import { IdTitle } from "../dto/idTitle";
 import { makeLogger } from '../../utils';
+import * as fs from 'fs';
 
 interface ItFunction {
     title: string;
@@ -12,15 +13,15 @@ interface ItFunction {
     endLine: number;
 }
 
-export class TextUtil {
-    private log = makeLogger();
+/** heavy object, drop as soon as possible */
+export class E2eFile {
     private _its?: ItFunction[];
-    constructor(private document: TextDocument) {
+    constructor(private uri: string, private text: string) {
     }
 
     private describeOrIt(itOrDescribe: ts.ExpressionStatement, document: ts.SourceFile): ItFunction {
         function getStringLiteralValue(node: ts.Node) {
-            if(node.kind !== ts.SyntaxKind.StringLiteral) {
+            if (node.kind !== ts.SyntaxKind.StringLiteral) {
                 throw new Error(`Not a string literal. ${node}`);
             }
             return (node as ts.StringLiteral).text;
@@ -40,7 +41,7 @@ export class TextUtil {
         let name = '';
         let arg0 = callExpression.arguments[0];
         switch (arg0.kind) {
-    
+
             case ts.SyntaxKind.PropertyAccessExpression:
                 // "describe" method
                 let propertyAccess = arg0 as ts.PropertyAccessExpression;
@@ -67,8 +68,8 @@ export class TextUtil {
 
     private getDom(): ts.SourceFile {
         return ts.createSourceFile(
-            this.document.uri.toString(),
-            this.document.getText(),
+            this.uri,
+            this.text,
             ts.ScriptTarget.Latest);
     }
 
@@ -121,14 +122,6 @@ export class TextUtil {
         throw new Error('No function found');
     }
 
-    public static parseTestCaseIdFromTitle(title: string) {
-        let result = new RegExp("\w*\\[(\\d+)]").exec(title);
-        if (result === null) {
-            throw new Error(`Unknown test case name format: ${title}`);
-        }
-        return Number.parseInt(result[1]);
-    }
-
     public getTestCase(selection: Selection): IdTitle {
 
         let it = this._getTestCase(selection);
@@ -137,5 +130,34 @@ export class TextUtil {
             id: TextUtil.parseTestCaseIdFromTitle(it.title),
             title: it.title
         };
+    }
+
+    public getAllTests(): ItFunction[] {
+        if (!this._its) {
+            this._its = this.parse();
+        }
+        return this._its;
+    }
+}
+
+export class TextUtil {
+    private log = makeLogger();
+
+    static fromTextDocument(document: TextDocument) {
+        return new E2eFile(document.uri.toString(),
+            document.getText());
+    }
+
+    static async fromPath(uri: string) {
+        return new E2eFile(uri,
+            (await fs.promises.readFile(uri)).toString());
+    }
+
+    public static parseTestCaseIdFromTitle(title: string) {
+        let result = new RegExp("\w*\\[(\\d+)]").exec(title);
+        if (result === null) {
+            throw new Error(`Unknown test case name format: ${title}`);
+        }
+        return Number.parseInt(result[1]);
     }
 }

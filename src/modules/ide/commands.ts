@@ -136,7 +136,7 @@ export class IdeCommands {
         this.log.info(`Generating a web view`);
         let idTitle: IdTitle;
         try {
-            idTitle = new TextUtil(editor.document).getTestCase(editor.selection);
+            idTitle = TextUtil.fromTextDocument(editor.document).getTestCase(editor.selection);
         } catch (e) {
             this.error(`Can't parse the test file.`);
             return;
