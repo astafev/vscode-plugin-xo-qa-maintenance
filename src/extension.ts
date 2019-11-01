@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	log.debug('Creating a tree view');
-	vscode.window.registerTreeDataProvider('testsExplorer', new TreeView());
+	vscode.window.registerTreeDataProvider('testsExplorer', new TreeView(context));
 
 	function unhandledError(e: any) {
 		log.error(`Error occured! Uncaught exception. `, e);

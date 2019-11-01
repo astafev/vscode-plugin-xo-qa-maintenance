@@ -3,7 +3,7 @@ import { FileTreeItem } from './fileItem';
 import { makeLogger } from '../../../utils';
 
 export interface TreeViewItem {
-    toTreeItem(): Promise<vscode.TreeItem>;
+    toTreeItem(context: vscode.ExtensionContext): Promise<vscode.TreeItem>;
     getChildren(): Promise<TreeViewItem[]>;
     toString(): string;
 }
@@ -16,8 +16,10 @@ export class TreeView implements vscode.TreeDataProvider<TreeViewItem> {
     private log = makeLogger();
     onDidChangeTreeData?: vscode.Event<TreeViewItem | null | undefined> | undefined;
 
+    constructor(private context: vscode.ExtensionContext) {}
+
     getTreeItem(element: TreeViewItem): Thenable<vscode.TreeItem> {
-        return element.toTreeItem();
+        return element.toTreeItem(this.context);
     }
 
     getChildren(element?: TreeViewItem | undefined): Promise<TreeViewItem[]> {
@@ -31,7 +33,7 @@ export class TreeView implements vscode.TreeDataProvider<TreeViewItem> {
         if (!vscode.workspace.rootPath) {
             this.log.info(`Root path is not available. ${JSON.stringify(vscode.workspace)}`);
             return Promise.resolve({
-                toTreeItem: () => {
+                toTreeItem: (context) => {
                     return Promise.resolve(new vscode.TreeItem(`Can't detect the root path`));
                 }
             } as TreeViewItem
