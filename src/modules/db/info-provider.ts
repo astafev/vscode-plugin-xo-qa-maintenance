@@ -5,8 +5,19 @@ import { IdTitle } from "../dto/idTitle";
 import * as _ from "lodash";
 
 export class InfoProvider extends SqlUtil {
-    constructor(path: string) {
+    private static _instance: InfoProvider;
+
+    private constructor(path: string) {
         super(path);
+    }
+
+    static create(path: string) {
+        this._instance = new InfoProvider(path);
+        return this._instance;
+    }
+
+    static get instance() {
+        return this._instance;
     }
 
     public getTestCaseRunDetails(data: IdTitle): TestCaseDetails {
@@ -42,5 +53,16 @@ export class InfoProvider extends SqlUtil {
                 comment: val.user_comment as string
             } as TestCaseRun;
         });
+    }
+
+    public getInfoForTreeView(tcId: number): {
+        status: string
+    } {
+        let result: any = this.db.prepare(`SELECT * FROM test_result WHERE test_case_id = ?
+        ORDER BY ci_run_id DESC
+        LIMIT 1`).get(tcId);
+        return {
+            status: _.get(result, 'result', undefined)
+        };
     }
 }

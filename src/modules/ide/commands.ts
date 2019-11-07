@@ -106,7 +106,7 @@ export class IdeCommands {
     }
 
     private getDbInfoProvider() {
-        return new InfoProvider(this.projectConfig.db);
+        return InfoProvider.create(this.projectConfig.db);
     }
 
     public pullTheBuild(buildId: number, api?: JenkinsAPI, db?: DbPopulator) {

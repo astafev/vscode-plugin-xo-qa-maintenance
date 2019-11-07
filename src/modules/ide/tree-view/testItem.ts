@@ -2,18 +2,39 @@ import { TreeViewItem, TreeView } from "./treeView";
 import * as vscode from 'vscode';
 import { TextUtil } from "../text-util";
 import * as path from 'path';
+import { InfoProvider } from "../../db/info-provider";
 
 export class TestTreeItem implements TreeViewItem {
+    private id: number;
 
     constructor(private testName: string,
         private fileName: string,
-        private line: number) { }
+        private line: number) {
+        this.id = TextUtil.parseTestCaseIdFromTitle(testName);
+    }
 
-    toTreeItem(context: vscode.ExtensionContext): Promise<vscode.TreeItem> {
-        let treeItem = new vscode.TreeItem(this.testName, vscode.TreeItemCollapsibleState.None);
-        treeItem.iconPath = context.asAbsolutePath(path.join('media', 'explorer-icons', 'checked.svg'));
-        treeItem.command = { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.fileName, this.line], };
-        return Promise.resolve(treeItem);
+    async toTreeItem(context: vscode.ExtensionContext): Promise<vscode.TreeItem> {
+        let dbData = this.pullDbData();
+        return {
+            label: this.testName,
+            iconPath: this.getIcon(dbData.status, context),
+            command: { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.fileName, this.line], }
+        };
+    }
+
+    private getIcon(status: string, context: vscode.ExtensionContext) {
+        switch (status) {
+            case "passed":
+                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'success.svg'));
+            case "failed":
+                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'failure.svg'));
+            default:
+                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'question.svg'));
+        }
+    }
+
+    private pullDbData() {
+        return InfoProvider.instance.getInfoForTreeView(this.id);
     }
 
     getChildren(): Promise<TreeViewItem[]> {
