@@ -21,7 +21,7 @@ export class E2eFile {
 
     private describeOrIt(itOrDescribe: ts.ExpressionStatement, document: ts.SourceFile): ItFunction {
         function getStringLiteralValue(node: ts.Node) {
-            if (node.kind !== ts.SyntaxKind.StringLiteral) {
+            if (node.kind !== ts.SyntaxKind.StringLiteral && node.kind !== ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
                 throw new Error(`Not a string literal. ${node}`);
             }
             return (node as ts.StringLiteral).text;
@@ -52,6 +52,7 @@ export class E2eFile {
                 name = getStringLiteralValue((arg0 as ts.BinaryExpression).left) + getStringLiteralValue((arg0 as ts.BinaryExpression).right);
                 break;
             case ts.SyntaxKind.StringLiteral:
+            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
                 // typical case for "it" method
                 name = getStringLiteralValue(arg0);
                 break;
@@ -61,7 +62,8 @@ export class E2eFile {
             title: name,
             body: (callExpression.arguments[1] as ts.ArrowFunction).body as ts.Block,
             position: callExpression.pos,
-            line: document.getLineAndCharacterOfPosition(callExpression.pos).line,
+            // by some reason, the pos is always somewhere 2 lines before
+            line: document.getLineAndCharacterOfPosition(callExpression.pos).line + 2,
             endLine: document.getLineAndCharacterOfPosition(callExpression.end).line
         };
     }

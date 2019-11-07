@@ -16,7 +16,16 @@ export class TreeView implements vscode.TreeDataProvider<TreeViewItem> {
     private log = makeLogger();
     onDidChangeTreeData?: vscode.Event<TreeViewItem | null | undefined> | undefined;
 
-    constructor(private context: vscode.ExtensionContext) {}
+    constructor(private context: vscode.ExtensionContext) {
+        vscode.commands.registerCommand('xoQAMaintCIJobAnalyzer.openFile', (resource, line) => this.openResource(resource, line));
+    }
+
+    private openResource(resource: string, line: number = 1): void {
+        let position = new vscode.Position(line, 0);
+        vscode.window.showTextDocument(vscode.Uri.file(resource), {
+            selection: new vscode.Range(position, position)
+        });
+    }
 
     getTreeItem(element: TreeViewItem): Thenable<vscode.TreeItem> {
         return element.toTreeItem(this.context);

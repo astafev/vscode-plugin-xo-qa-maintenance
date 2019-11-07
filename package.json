@@ -59,6 +59,10 @@
 				"command": "xoQAMaintCIJobAnalyzer.doCoolStuff",
 				"title": "do cool stuff",
 				"when": "editorLangId == typescript, https://code.visualstudio.com/docs/getstarted/keybindings#_when-clause-contexts"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.openFile",
+				"title": "Open File"
 			}
 		],
 		"menus": {
@@ -66,7 +70,7 @@
 				{
 					"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
 					"when": "editorLangId == typescript",
-					"group": "xoQAMaint@1"
+					"group": "xoQAMaintCIJobAnalyzer@1"
 				}
 			]
 		},

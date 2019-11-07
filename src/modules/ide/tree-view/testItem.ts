@@ -5,14 +5,14 @@ import * as path from 'path';
 
 export class TestTreeItem implements TreeViewItem {
 
-    constructor(private testName: string) { }
+    constructor(private testName: string,
+        private fileName: string,
+        private line: number) { }
 
     toTreeItem(context: vscode.ExtensionContext): Promise<vscode.TreeItem> {
         let treeItem = new vscode.TreeItem(this.testName, vscode.TreeItemCollapsibleState.None);
         treeItem.iconPath = context.asAbsolutePath(path.join('media', 'explorer-icons', 'checked.svg'));
-        setTimeout(() => {
-            treeItem.iconPath = context.asAbsolutePath(path.join('media', 'explorer-icons', 'cancel.svg'));
-        }, 2000);
+        treeItem.command = { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.fileName, this.line], };
         return Promise.resolve(treeItem);
     }
 
@@ -24,10 +24,10 @@ export class TestTreeItem implements TreeViewItem {
         return `it(${this.testName})`;
     }
 
-    static async parseFile(path: string): Promise<TestTreeItem[]> {
-        let e2e = await TextUtil.fromPath(path);
+    static async parseFile(file: string): Promise<TestTreeItem[]> {
+        let e2e = await TextUtil.fromPath(file);
         return e2e.getAllTests().map(itFn => {
-            return new TestTreeItem(itFn.title);
+            return new TestTreeItem(itFn.title, file, itFn.line);
         });
     }
 }
