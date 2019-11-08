@@ -5,10 +5,10 @@ import * as path from 'path';
 import { InfoProvider } from "../../db/info-provider";
 
 export class TestTreeItem implements TreeViewItem {
-    private id: number;
+    public readonly id: number;
 
-    constructor(private testName: string,
-        private fileName: string,
+    constructor(public readonly testName: string,
+        public readonly fileName: string,
         private line: number) {
         this.id = TextUtil.parseTestCaseIdFromTitle(testName);
     }

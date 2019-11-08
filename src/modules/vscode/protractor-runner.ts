@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileTreeItem } from './tree-view/fileItem';
 import { TreeViewItem } from './tree-view/treeView';
+import { TestTreeItem } from './tree-view/testItem';
 
 /** a lot is borrowed from https://github.com/lnaie/vscode-protractor-test-runner/blob/master/src/extension.ts */
 export namespace ProtractorRun {
@@ -18,11 +19,13 @@ export namespace ProtractorRun {
             } else {
                 ProtractorRun.startProcess(fileItem.filePath);
             }
+        } else if (item instanceof TestTreeItem) {
+            let itItem = item as TestTreeItem;
+            ProtractorRun.startProcess(itItem.fileName, `${itItem.id}`);
         }
-        console.log(item);
     }
 
-    export function startProcess(filePath: string) {
+    export function startProcess(filePath: string, grep?: string) {
         // Already running one?
         if (process) {
             const msg = 'There is a command running right now. Terminate it before executing a new command?';
@@ -39,7 +42,10 @@ export namespace ProtractorRun {
         commandOutput.show();
 
         // Start a new command
-        var cmd = `protractor --specs ${filePath}**`;
+        var cmd = `protractor --specs ${filePath}`;
+        if (grep) {
+            cmd += ` --grep "${grep}"`;
+        }
         commandOutput.appendLine(`> Running command: ${cmd}...`);
 
         if (!vscode.workspace.rootPath) {
