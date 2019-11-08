@@ -56,13 +56,12 @@
 				"title": "XO.Maint: Show TC Info"
 			},
 			{
-				"command": "xoQAMaintCIJobAnalyzer.doCoolStuff",
-				"title": "do cool stuff",
-				"when": "editorLangId == typescript, https://code.visualstudio.com/docs/getstarted/keybindings#_when-clause-contexts"
-			},
-			{
 				"command": "xoQAMaintCIJobAnalyzer.openFile",
 				"title": "Open File"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.protractorRun",
+				"title": "Run"
 			}
 		],
 		"menus": {
@@ -71,6 +70,13 @@
 					"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
 					"when": "editorLangId == typescript",
 					"group": "xoQAMaintCIJobAnalyzer@1"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "xoQAMaintCIJobAnalyzer.protractorRun",
+					"when": "view == testsExplorer",
+					"group": "inline"
 				}
 			]
 		},
@@ -132,7 +138,9 @@
 		"mkdirp": "^0.5.1",
 		"node-sqlite-purejs": "0.0.2",
 		"rimraf": "^3.0.0",
+		"spawn-command": "0.0.2-1",
 		"tmp": "^0.1.0",
+		"tree-kill": "^1.2.1",
 		"typed-rest-client": "^1.5.0",
 		"typescript": "^3.3.1",
 		"unzipper": "^0.10.5",

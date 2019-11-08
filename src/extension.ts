@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
-import { IdeCommands } from './modules/ide/commands';
+import { IdeCommands } from './modules/vscode/commands';
 import { parseRange, makeLogger } from './utils';
-import { TreeView } from './modules/ide/tree-view/treeView';
+import { TreeView } from './modules/vscode/tree-view/treeView';
+import { FileTreeItem } from './modules/vscode/tree-view/fileItem';
+import { ProtractorRun } from './modules/vscode/protractor-runner';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -14,6 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const commands = new IdeCommands();
 	commands.init();
 
+	newCommand('protractorRun', ProtractorRun.run);
 	newCommand('pullTheBuilds', async () => {
 		let buildsInput = await vscode.window.showInputBox({
 			placeHolder: '10, 11, 12-15',

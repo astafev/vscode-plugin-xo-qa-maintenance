@@ -26,6 +26,7 @@ export class IdeCommands {
 
     async init() {
         await this.readConfiguration();
+        InfoProvider.create(this.projectConfig.db);
     }
 
     public async readConfiguration() {
@@ -106,7 +107,7 @@ export class IdeCommands {
     }
 
     private getDbInfoProvider() {
-        return InfoProvider.create(this.projectConfig.db);
+        return InfoProvider.instance;
     }
 
     public pullTheBuild(buildId: number, api?: JenkinsAPI, db?: DbPopulator) {

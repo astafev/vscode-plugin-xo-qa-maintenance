@@ -10,8 +10,12 @@ const PATH_FROM_ROOT = path.join('e2e', 'test-suites');
 
 const log = makeLogger();
 export class FileTreeItem implements TreeViewItem {
-    constructor(private filePath: string, private fsStat: fs.Stats, private baseName = path.basename(filePath)) {
+    constructor(public readonly filePath: string, private fsStat: fs.Stats, private baseName = path.basename(filePath)) {
         log.debug(`Creating a file tree item ${filePath}`);
+    }
+
+    get isDirectory() {
+        return this.fsStat.isDirectory();
     }
     
     async getChildren(): Promise<TreeViewItem[]> {
