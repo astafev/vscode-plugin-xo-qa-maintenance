@@ -133,15 +133,18 @@ export class IdeCommands {
         });
     }
 
-    public createAWebView(editor: vscode.TextEditor) {
-        this.log.info(`Generating a web view`);
+    public createAWebViewFromEditor(editor: vscode.TextEditor) {
         let idTitle: IdTitle;
+        this.log.info(`Generating a web view`);
         try {
             idTitle = TextUtil.fromTextDocument(editor.document).getTestCase(editor.selection);
         } catch (e) {
             this.error(`Can't parse the test file.`);
             return;
         }
+        return this.createAWebViewFromIdTitle(idTitle);
+    }
+    public createAWebViewFromIdTitle(idTitle: IdTitle) {
         this.log.debug(`id = ${idTitle.id}, title = ${idTitle.title}`);
         const panel = vscode.window.createWebviewPanel(
             'testCaseDetails',
@@ -168,4 +171,5 @@ export class IdeCommands {
             panel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml(panel.webview);
         }
     }
+
 }

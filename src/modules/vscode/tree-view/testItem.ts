@@ -18,7 +18,8 @@ export class TestTreeItem implements TreeViewItem {
         return {
             label: this.testName,
             iconPath: this.getIcon(dbData.status, context),
-            command: { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.fileName, this.line], }
+            command: { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.fileName, this.line], },
+            contextValue: 'testItem',
         };
     }
 

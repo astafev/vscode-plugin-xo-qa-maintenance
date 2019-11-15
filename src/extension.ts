@@ -4,6 +4,7 @@ import { parseRange, makeLogger } from './utils';
 import { TreeView } from './modules/vscode/tree-view/treeView';
 import { FileTreeItem } from './modules/vscode/tree-view/fileItem';
 import { ProtractorRun } from './modules/vscode/protractor-runner';
+import { TestTreeItem } from './modules/vscode/tree-view/testItem';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -33,9 +34,21 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
 		commands.readConfiguration();
 	}));
+	newCommand('showTCInfo2', (item) => {
+		if (item instanceof TestTreeItem) {
+			try {
+				commands.createAWebViewFromIdTitle({
+					id: item.id,
+					title: item.testName,
+				});
+			} catch (e) {
+				unhandledError(e);
+			}	
+		}
+	});
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showTCInfo`, (editor, edit) => {
 		try {
-			commands.createAWebView(editor);
+			commands.createAWebViewFromEditor(editor);
 		} catch (e) {
 			unhandledError(e);
 		}

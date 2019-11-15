@@ -34,8 +34,3 @@ Interesting:
 - https://github.com/microsoft/vscode-extension-samples/tree/master/comment-sample
 - https://code.visualstudio.com/api/extension-guides/tree-view
 - https://github.com/vscode-box/vscode-ast
-
-
-probably SQLite was a bad choice:
-1. It's difficult to launch with NodeJS,
-2. probably we could benefit from storing raw json files (object-oriented db).

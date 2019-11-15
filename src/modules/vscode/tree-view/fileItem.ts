@@ -50,7 +50,9 @@ export class FileTreeItem implements TreeViewItem {
         } else if (this.isE2e()) {
             state = vscode.TreeItemCollapsibleState.Collapsed;
         }
-        return Promise.resolve(new vscode.TreeItem(path.basename(this.filePath), state));
+        const item = new vscode.TreeItem(path.basename(this.filePath), state);
+        item.contextValue = 'fileItem';
+        return Promise.resolve(item);
     }
 
     static async parseRoot(root: string) {

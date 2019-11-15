@@ -56,6 +56,10 @@
 				"title": "XO.Maint: Show TC Info"
 			},
 			{
+				"command": "xoQAMaintCIJobAnalyzer.showTCInfo2",
+				"title": "XO.Maint: Show TC Info2"
+			},
+			{
 				"command": "xoQAMaintCIJobAnalyzer.openFile",
 				"title": "Open File"
 			},
@@ -77,6 +81,10 @@
 					"command": "xoQAMaintCIJobAnalyzer.protractorRun",
 					"when": "view == testsExplorer",
 					"group": "inline"
+				},
+				{
+					"command": "xoQAMaintCIJobAnalyzer.showTCInfo2",
+					"when": "view == testsExplorer && viewItem == testItem"
 				}
 			]
 		},
