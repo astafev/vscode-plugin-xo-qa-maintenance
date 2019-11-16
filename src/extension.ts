@@ -17,7 +17,6 @@ export function activate(context: vscode.ExtensionContext) {
 	const commands = new IdeCommands();
 	commands.init();
 
-	newCommand('protractorRun', ProtractorRun.run);
 	newCommand('pullTheBuilds', async () => {
 		let buildsInput = await vscode.window.showInputBox({
 			placeHolder: '10, 11, 12-15',
@@ -43,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 			} catch (e) {
 				unhandledError(e);
-			}	
+			}
 		}
 	});
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showTCInfo`, (editor, edit) => {
@@ -55,7 +54,10 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	log.debug('Creating a tree view');
-	vscode.window.registerTreeDataProvider('testsExplorer', new TreeView(context));
+	let treeView = new TreeView(context);
+	vscode.window.registerTreeDataProvider('testsExplorer', treeView);
+	newCommand('refreshNode', (el) => treeView.refreshNode(el));
+	newCommand('protractorRun', ProtractorRun.run);
 
 	function unhandledError(e: any) {
 		log.error(`Error occured! Uncaught exception. `, e);

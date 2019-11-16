@@ -11,7 +11,8 @@
 	],
 	"activationEvents": [
 		"onCommand:xoQAMaintCIJobAnalyzer.pullTheBuilds",
-		"onCommand:xoQAMaintCIJobAnalyzer.showTCInfo"
+		"onCommand:xoQAMaintCIJobAnalyzer.showTCInfo",
+		"onView:testsExplorer"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -57,7 +58,7 @@
 			},
 			{
 				"command": "xoQAMaintCIJobAnalyzer.showTCInfo2",
-				"title": "XO.Maint: Show TC Info2"
+				"title": "Show TC Info"
 			},
 			{
 				"command": "xoQAMaintCIJobAnalyzer.openFile",
@@ -66,9 +67,16 @@
 			{
 				"command": "xoQAMaintCIJobAnalyzer.protractorRun",
 				"title": "Run"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.refreshNode",
+				"title": "Refresh"
 			}
 		],
 		"menus": {
+			"view/title": [
+
+			],
 			"editor/context": [
 				{
 					"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
@@ -85,6 +93,10 @@
 				{
 					"command": "xoQAMaintCIJobAnalyzer.showTCInfo2",
 					"when": "view == testsExplorer && viewItem == testItem"
+				},
+				{
+					"command": "xoQAMaintCIJobAnalyzer.refreshNode",
+					"when": "view == testsExplorer"
 				}
 			]
 		},
