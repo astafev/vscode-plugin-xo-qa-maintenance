@@ -17,7 +17,7 @@ export class FileTreeItem implements TreeViewItem {
     get isDirectory() {
         return this.fsStat.isDirectory();
     }
-    
+
     async getChildren(): Promise<TreeViewItem[]> {
         if (this.fsStat.isDirectory()) {
             return fs.promises.readdir(this.filePath).then(files => {
@@ -43,15 +43,38 @@ export class FileTreeItem implements TreeViewItem {
         return this.baseName.endsWith('.e2e-spec.ts');
     }
 
-    toTreeItem(): Promise<vscode.TreeItem> {
+    private getIcon(context: vscode.ExtensionContext) {
+        let iconPath = (fileName: string)=>{
+            return context.asAbsolutePath(path.join('media', 'explorer-icons', 'files', `${fileName}.svg`));
+        };
+        if (this.isE2e()) {
+            return iconPath('e2e');
+        }
+        if (this.baseName.endsWith('helper.ts')) {
+            return iconPath('helper');
+        }
+        if (this.baseName.endsWith('po.ts')) {
+            return iconPath('po');
+        }
+        if (this.baseName.endsWith('constant.ts') || this.baseName.endsWith('constants.ts')) {
+            return iconPath('constants');
+        }
+        return iconPath('file');
+    }
+
+    toTreeItem(context: vscode.ExtensionContext): Promise<vscode.TreeItem> {
         let state = vscode.TreeItemCollapsibleState.None;
-        if (this.fsStat.isDirectory()) {
+        if (this.isDirectory) {
             state = vscode.TreeItemCollapsibleState.Collapsed;
         } else if (this.isE2e()) {
             state = vscode.TreeItemCollapsibleState.Collapsed;
         }
-        const item = new vscode.TreeItem(path.basename(this.filePath), state);
+        const item = new vscode.TreeItem(this.baseName, state);
         item.contextValue = 'fileItem';
+        if (!this.isDirectory) {
+            item.command = { command: 'xoQAMaintCIJobAnalyzer.openFile', title: "Open File", arguments: [this.filePath], };
+            item.iconPath = this.getIcon(context);
+        }
         return Promise.resolve(item);
     }
 

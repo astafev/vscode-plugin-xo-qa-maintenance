@@ -24,13 +24,14 @@ export class TestTreeItem implements TreeViewItem {
     }
 
     private getIcon(status: string, context: vscode.ExtensionContext) {
+        let folder = path.join('media', 'explorer-icons', 'statuses');
         switch (status) {
             case "passed":
-                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'success.svg'));
+                return context.asAbsolutePath(path.join(folder, 'success.svg'));
             case "failed":
-                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'failure.svg'));
+                return context.asAbsolutePath(path.join(folder, 'failure.svg'));
             default:
-                return context.asAbsolutePath(path.join('media', 'explorer-icons', 'question.svg'));
+                return context.asAbsolutePath(path.join(folder, 'question.svg'));
         }
     }
 
