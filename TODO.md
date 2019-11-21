@@ -5,15 +5,12 @@ Done:
 - [x] analyze the source code
 
 next:
-- [ ] tree view. https://code.visualstudio.com/api/extension-guides/tree-view
 - [~] view "detailed": test case results - last console, + 5 last builds with comments, + last not empty comment
 
 - [ ] save screenshots
 - [ ] view "detailed": add screenshots to the detailed view.
 - [ ] view: modify default code view to include test case status (failing, flaky, successful)
 - [~] log correctly. Check https://getpino.io/#/?
-- [ ] revoke the jenkins token used in the beginning
-- [ ] show progress https://github.com/microsoft/vscode-extension-samples/tree/master/progress-sample
 
 later:
 - [ ] bundle

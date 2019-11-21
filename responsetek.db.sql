@@ -1,4 +1,13 @@
 BEGIN TRANSACTION;
+DROP TABLE IF EXISTS "test_case";
+CREATE TABLE IF NOT EXISTS "test_case" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"title"	TEXT,
+	"file"	TEXT,
+	"line"	INTEGER,
+	"comment"	TEXT,
+	PRIMARY KEY("id")
+);
 DROP TABLE IF EXISTS "test_result";
 CREATE TABLE IF NOT EXISTS "test_result" (
 	"uid"	TEXT NOT NULL UNIQUE,
@@ -7,6 +16,8 @@ CREATE TABLE IF NOT EXISTS "test_result" (
 	"result"	TEXT,
 	"console"	TEXT,
 	"user_comment"	TEXT,
+	"start_time"	INTEGER,
+	"duration"	INTEGER,
 	PRIMARY KEY("uid")
 );
 DROP TABLE IF EXISTS "screenshots";
@@ -25,14 +36,6 @@ CREATE TABLE IF NOT EXISTS "ci_run" (
 	"console"	TEXT,
 	"branch"	TEXT,
 	"revision"	TEXT,
-	PRIMARY KEY("id")
-);
-DROP TABLE IF EXISTS "test_case";
-CREATE TABLE IF NOT EXISTS "test_case" (
-	"id"	INTEGER NOT NULL UNIQUE,
-	"title"	TEXT,
-	"file"	TEXT,
-	"line"	INTEGER,
 	PRIMARY KEY("id")
 );
 COMMIT;

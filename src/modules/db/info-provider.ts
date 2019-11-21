@@ -3,20 +3,23 @@ import { TestCaseDetails } from "../dto/testCaseDetails";
 import { TestCaseRun } from "../dto/testCaseRun";
 import { IdTitle } from "../dto/idTitle";
 import * as _ from "lodash";
+import { Configuration } from "../vscode/configuration";
 
 export class InfoProvider extends SqlUtil {
     private static _instance: InfoProvider;
 
-    private constructor(path: string) {
-        super(path);
-    }
-
-    static create(path: string) {
-        this._instance = new InfoProvider(path);
-        return this._instance;
+    private constructor() {
+        super();
     }
 
     static get instance() {
+        if (!this._instance) {
+            let provider = new InfoProvider();
+            this._instance = provider;
+            Configuration.registerCallbackOnUpdate(() => {
+                return provider.reset();
+            });
+        }
         return this._instance;
     }
 

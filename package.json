@@ -43,6 +43,12 @@
 						"default": "",
 						"description": "A path to a CI job. Example: http://jervis.aureacentral.com/job/Exinda/job/exinda_exos_jenkins/job/enq-qa-integration/job/exinda-exos-protractor-devqa-automation/. Project-specific.",
 						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.pathFromRoot": {
+						"type": "string",
+						"default": "e2e/test-suites",
+						"description": "path where test suites are suited. Default to e2e/test-suites.",
+						"scope": "resource"
 					}
 				}
 			}

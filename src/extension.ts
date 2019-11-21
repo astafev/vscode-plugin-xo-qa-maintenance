@@ -5,6 +5,7 @@ import { TreeView } from './modules/vscode/tree-view/treeView';
 import { FileTreeItem } from './modules/vscode/tree-view/fileItem';
 import { ProtractorRun } from './modules/vscode/protractor-runner';
 import { TestTreeItem } from './modules/vscode/tree-view/testItem';
+import { Configuration } from './modules/vscode/configuration';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -15,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const log = makeLogger();
 
 	const commands = new IdeCommands();
-	commands.init();
+	Configuration.init();
 
 	newCommand('pullTheBuilds', async () => {
 		let buildsInput = await vscode.window.showInputBox({
@@ -31,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
-		commands.readConfiguration();
+		return Configuration.onUpdate(event);
 	}));
 	newCommand('showTCInfo2', (item) => {
 		if (item instanceof TestTreeItem) {

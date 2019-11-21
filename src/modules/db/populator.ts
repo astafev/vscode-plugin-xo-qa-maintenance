@@ -2,12 +2,14 @@ import { Behaviors, AllureReport, BehaviorChild } from "../jenkins/allure-analyz
 import { SqlUtil } from "./util";
 import { makeLogger } from "../../utils";
 import { CIBuild } from "../jenkins/dto";
+import * as fs from 'fs';
 
 export class DbPopulator extends SqlUtil {
     private log = makeLogger();
 
-    constructor(path: string) {
-        super(path);
+    constructor() {
+        super();
+        this.checkInited();
     }
 
     public async store(content: CIBuild) {
@@ -67,5 +69,17 @@ export class DbPopulator extends SqlUtil {
     public updateComment(uid: string, comment: string) {
         let stmt = this.db.prepare(`UPDATE test_result SET user_comment = ? WHERE uid = ?`);
         stmt.run(comment, uid);
+    }
+
+    public checkInited() {
+        let stmt = this.db.prepare(`SELECT name
+    FROM sqlite_master
+    WHERE
+        type='table' and name='ci_run'`);
+        let row = stmt.get();
+        if (row === undefined) {
+            const sqlInit = fs.readFileSync('./responsetek.db.sql').toString('UTF-8');
+            this.db.exec(sqlInit);
+        }
     }
 }

@@ -1,75 +1,21 @@
 import { JenkinsAPI } from "../jenkins/jenkins";
 import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
-import { PREFIX } from "../../extension";
 import { makeLogger } from "../../utils";
 import { RunDetailsWebView } from "../webviews/run-details-view";
 import { TextUtil } from "./text-util";
 import { InfoProvider } from "../db/info-provider";
 import { TestCaseDetails } from "../dto/testCaseDetails";
 import { IdTitle } from "../dto/idTitle";
+import { Configuration } from "./configuration";
+import { AlluresReportAnalyzer } from "../jenkins/allure-analyze";
+import { JenkinsBuild } from "../jenkins/dto";
 
 export class IdeCommands {
-    private _commonConfig?: {
-        jenkinsUser: string,
-        jenkinsToken: string
-    };
-    private _projectConfig?: {
-        db: string,
-        jenkinsJob: string
-    };
 
     private log = makeLogger();
 
     constructor() {
-    }
-
-    async init() {
-        await this.readConfiguration();
-        InfoProvider.create(this.projectConfig.db);
-    }
-
-    public async readConfiguration() {
-        this.log.info('Reading configuration');
-        const config = await vscode.workspace.getConfiguration(PREFIX, null);
-        this._projectConfig = {
-            db: config.get('db', ''),
-            jenkinsJob: config.get('jenkinsJob', '')
-        };
-
-        this._commonConfig = {
-            jenkinsUser: config.get('jenkinsUser', ''),
-            jenkinsToken: config.get('jenkinsToken', '')
-        };
-        this.log.debug(`The project config`, this._projectConfig);
-    }
-
-    public setConfig(
-        commonConfig: {
-            jenkinsUser: string,
-            jenkinsToken: string
-        },
-        projectConfig: {
-            db: string,
-            jenkinsJob: string
-        }
-    ) {
-        this._commonConfig = commonConfig;
-        this._projectConfig = projectConfig;
-    }
-
-    private get projectConfig(): { db: string, jenkinsJob: string } {
-        if (this._projectConfig === undefined) {
-            throw this.error('Define the configuration');
-        }
-        return this._projectConfig;
-    }
-
-    private get commonConfig(): { jenkinsUser: string, jenkinsToken: string } {
-        if (this._commonConfig === undefined) {
-            throw this.error('Define the configuration');
-        }
-        return this._commonConfig;
     }
 
     public error(errorMsg: string) {
@@ -92,44 +38,68 @@ export class IdeCommands {
                 return this.pullTheBuild(id, api, db);
             });
         }, Promise.resolve()).then(() => {
-
+            this.information(`Successfully pulled builds ${buildIds.join(',')}`);
         });
     }
 
     private getApi() {
-        return new JenkinsAPI(this.commonConfig.jenkinsToken,
-            this.commonConfig.jenkinsUser,
-            this.projectConfig.jenkinsJob);
+        let jenkinsConfig = Configuration.commonConfig;
+        return new JenkinsAPI(jenkinsConfig.jenkinsToken,
+            jenkinsConfig.jenkinsUser,
+            Configuration.projectConfig.jenkinsJobUrl);
     }
 
     private getDbPopulator() {
-        return new DbPopulator(this.projectConfig.db);
+        return new DbPopulator();
     }
 
     private getDbInfoProvider() {
         return InfoProvider.instance;
     }
 
-    public pullTheBuild(buildId: number, api?: JenkinsAPI, db?: DbPopulator) {
-        if (api === undefined) {
-            api = this.getApi();
-        }
-
-        let _db: DbPopulator;
-        if (db === undefined) {
-            db = this.getDbPopulator();
-        } else {
-            _db = db;
-        }
-        this.information(`Pulling build ${buildId}`);
-        return api.pullCiBuild(buildId).then(result => {
-            return _db.store(result);
+    public pullTheBuild(buildId: number, api: JenkinsAPI = this.getApi(), populator: DbPopulator) {
+        return vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: `Pulling build ${buildId}`,
+            cancellable: true
+        }, (progress, token) => {
+            let cancelled = false;
+            token.onCancellationRequested(() => {
+                this.log.info(`User cancelled ${buildId} build pull`);
+                cancelled = true;
+            });
+            return api.getBuildStatus(buildId).then(build => {
+                progress.report({ increment: 10, message: `Pulled build metainfo, checking the build...` });
+                return api.checkBuild(build).then(() => {
+                    if (cancelled) {
+                        return '';
+                    }
+                    progress.report({ increment: 25, message: `Build is fine. Downloading the artefacts...` });
+                    return api.downloadAndUnzip(build, buildId);
+                }).then(dir => {
+                    if (cancelled) {
+                        return undefined;
+                    }
+                    progress.report({ increment: 80, message: `Downloaded. Parsing...` });
+                    return new JenkinsBuild(
+                        build,
+                        new AlluresReportAnalyzer(dir).parse());
+                }).then(dto => {
+                    if (cancelled || !dto) {
+                        return null;
+                    }
+                    progress.report({ increment: 90, message: `Parsed. Storing...` });
+                    return populator.store(dto);
+                });
+            }).catch(err => {
+                this.log.error(err);
+                this.error(`Had an error pulling build ${buildId}:
+                ${err}`);
+            });
         }).then(() => {
-            this.information(`Successfully pulled ${buildId} build`);
-        }).catch(err => {
-            this.log.error(err);
-            this.error(`Had an error pulling build ${buildId}:
-            ${err}`);
+            // casting from Thenable to a Promise for convenience
+            this.log.info(`Pulled build ${buildId}`);
+            return Promise.resolve();
         });
     }
 

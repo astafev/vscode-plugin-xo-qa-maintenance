@@ -68,13 +68,17 @@ export class JenkinsAPI {
     public async pullCiBuild(buildId: number): Promise<CIBuild> {
         let build = await this.getBuildStatus(buildId);
         this.checkBuild(build);
-        let dir = await this.downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
+        let dir = await this._downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
         return new JenkinsBuild(
             build,
             new AlluresReportAnalyzer(dir).parse());
     }
 
-    private downloadAndUnzip(address: string): Promise<string> {
+    public downloadAndUnzip(build: IJenkinsBuild, buildId: number): Promise<string> {
+        return this._downloadAndUnzip(`${this.prefix}${buildId}/artifact/${JenkinsAPI.ALLURE_REPORT_NAME}`);
+    }
+
+    private _downloadAndUnzip(address: string): Promise<string> {
         const client = this.rest.client;
         return new Promise((resolve, reject) => {
             tmp.dir(async (err, dir) => {
