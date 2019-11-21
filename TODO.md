@@ -14,10 +14,8 @@ next:
 
 later:
 - [ ] bundle
-- [ ] db creation logic
 - [ ] data retention policy
 - [ ] idea: view for recent CI builds
-- [ ] idea: command "pull X recent builds"
 - [ ] idea: watch a build, pull when it's done
 - [ ] add support for TeamCity
 - [ ] status view: show the internal information like ci_run table

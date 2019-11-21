@@ -12,6 +12,7 @@
 	"activationEvents": [
 		"onCommand:xoQAMaintCIJobAnalyzer.pullTheBuilds",
 		"onCommand:xoQAMaintCIJobAnalyzer.showTCInfo",
+		"onLanguage:typescript",
 		"onView:testsExplorer"
 	],
 	"main": "./out/extension.js",
@@ -56,7 +57,11 @@
 		"commands": [
 			{
 				"command": "xoQAMaintCIJobAnalyzer.pullTheBuilds",
-				"title": "XO.Maint: Pull CI builds"
+				"title": "XO.Maint: Pull the builds"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.pullCiBuilds...",
+				"title": "XO.Maint: Pull CI builds..."
 			},
 			{
 				"command": "xoQAMaintCIJobAnalyzer.showTCInfo",

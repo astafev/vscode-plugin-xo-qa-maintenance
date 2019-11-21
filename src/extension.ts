@@ -18,17 +18,12 @@ export function activate(context: vscode.ExtensionContext) {
 	const commands = new IdeCommands();
 	Configuration.init();
 
-	newCommand('pullTheBuilds', async () => {
-		let buildsInput = await vscode.window.showInputBox({
-			placeHolder: '10, 11, 12-15',
-			prompt: 'the range is inclusive'
-		});
-		if (!buildsInput) {
-			// do nothing
-			return;
-		}
-		let builds = parseRange(buildsInput);
-		commands.pullTheBuilds(builds);
+	newCommand('pullTheBuilds', () => {
+		return commands.pullTheBuildsCmd();
+	});
+	
+	newCommand('pullCiBuilds...', () => {
+		return commands.pullCiBuildsCmd();
 	});
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {

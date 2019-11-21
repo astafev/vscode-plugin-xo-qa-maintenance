@@ -1,7 +1,7 @@
 import { JenkinsAPI } from "../jenkins/jenkins";
 import { DbPopulator } from "../db/populator";
 import * as vscode from 'vscode';
-import { makeLogger } from "../../utils";
+import { makeLogger, parseRange } from "../../utils";
 import { RunDetailsWebView } from "../webviews/run-details-view";
 import { TextUtil } from "./text-util";
 import { InfoProvider } from "../db/info-provider";
@@ -28,8 +28,58 @@ export class IdeCommands {
         this.log.info(message);
         vscode.window.showInformationMessage(message);
     }
+    public async pullTheBuildsCmd() {
+        let buildsInput = await vscode.window.showInputBox({
+            placeHolder: '10, 11, 12-15',
+            prompt: 'the range is inclusive'
+        });
+        if (!buildsInput) {
+            // do nothing
+            return;
+        }
+        let builds = parseRange(buildsInput);
+        this.pullTheBuilds(builds);
+    }
 
-    public pullTheBuilds(buildIds: number[]) {
+    public async pullNLastBuildsCmd() {
+        let buildsInput = await vscode.window.showInputBox({
+            prompt: 'How many builds do I want to pull?'
+        });
+        if (!buildsInput) {
+            // do nothing
+            return;
+        }
+        let builds;
+        try {
+            builds = Number.parseInt(buildsInput, 10);
+        } catch (e) {
+            this.log.warn(`Unable to parse ${buildsInput}`, e);
+            this.error(`Please define a number, can't parse "${buildsInput}"`);
+            return;
+        }
+        this.pullNLastBuilds(builds);
+    }
+
+    /** */
+    public async pullCiBuildsCmd() {
+        const pullTheBuildsOption = 'Pull exact builds (I want to specify ids)';
+        const pullNLastBuildsOption = 'Pull N last builds builds';
+        const command = await vscode.window.showQuickPick([pullTheBuildsOption, pullNLastBuildsOption]);
+        if (command === pullTheBuildsOption) {
+            return this.pullTheBuildsCmd();
+        } else if (command === pullNLastBuildsOption) {
+            return this.pullNLastBuildsCmd();
+        }
+
+    }
+    private async pullNLastBuilds(n: number) {
+        const api = this.getApi();
+        const builds = await api.getLastNFinishedBuilds(n);
+        this.information(`Goind to pull builds ${builds.join(',')}`);
+        this.pullTheBuilds(builds);
+    }
+
+    private pullTheBuilds(buildIds: number[]) {
         let api = this.getApi();
         let db = this.getDbPopulator();
         //vscode.window.

@@ -1,7 +1,8 @@
 import * as rm from 'typed-rest-client/RestClient';
 import { BasicCredentialHandler } from 'typed-rest-client/Handlers';
-import { IJenkinsBuild } from 'jenkins-api-ts-typings';
+import { IJenkinsBuild, IJenkinsJob } from 'jenkins-api-ts-typings';
 import * as tmp from 'tmp';
+import * as _ from 'lodash';
 import * as unzip from 'unzipper';
 import { AlluresReportAnalyzer } from './allure-analyze';
 import { makeLogger } from '../../utils';
@@ -50,6 +51,43 @@ export class JenkinsAPI {
             throw new Error('Unknown result');
         }
         return res.result;
+    }
+
+    private async getJobMetaInfo(): Promise<IJenkinsJob> {
+        let res: rm.IRestResponse<IJenkinsJob> = await this.rest.get<IJenkinsJob>('api/json');
+
+        if (res.statusCode !== 200) {
+            this.log.error(`Error getting job metainfo ${this.prefix}`);
+            this.log.error(`${res.statusCode}: ${res.result}`);
+            throw new Error(`Error pulling job info ${this.prefix}! Status: ${res.statusCode}. Check the config.`);
+        }
+        if (res.result === null) {
+            console.log(res.result);
+            throw new Error('Unknown result');
+        }
+        return res.result;
+    }
+
+    public async getLastNFinishedBuilds(n: number): Promise<number[]> {
+        const jobInfo = await this.getJobMetaInfo();
+        let buildIds = _.reverse(jobInfo.builds.map(build => {
+            return build.number;
+        }));
+        let iteratorIdx = 0;
+        let results: Promise<number>[] = [];
+        function _pull(idx: number, api: JenkinsAPI): Promise<number> {
+            return api.getBuildStatus(idx).then(() => {
+                return idx;
+            }).catch(_err => {
+                return _pull(buildIds[iteratorIdx++], api);
+            });
+        }
+        while (results.length < n && iteratorIdx < buildIds.length) {
+            results.push(
+                _pull(buildIds[iteratorIdx++], this));
+        }
+
+        return Promise.all(results);
     }
 
     public async checkBuild(build: IJenkinsBuild) {
