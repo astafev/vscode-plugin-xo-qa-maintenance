@@ -1,9 +1,20 @@
 import * as fs from 'fs';
 import { makeLogger } from '../../utils';
+import * as path from 'path';
 
 export interface AllureReport {
     behaviors: Behaviors;
-    parseLog(testCaseUid: string): string | undefined;
+    parseTestCase(testCaseUid: string): TestCase;
+    /** @param source as written in the test case json file. Typically uid+".png" */
+    pathToAttachment(source: string): string;
+}
+
+export interface TestCase {
+    uid: string;
+    log: string;
+    attachments: Attachment[];
+    statusMessage?: string;
+    statusTrace?: string;
 }
 
 export class AlluresReportAnalyzer {
@@ -13,30 +24,62 @@ export class AlluresReportAnalyzer {
     }
 
     public parse(): AllureReport {
-        let dir = this.dir;
-        let log = this.log;
+        const dir = this.dir;
+        const log = this.log;
         return {
             behaviors: this.parseBehaviors(),
-            parseLog: function (uid: string): string | undefined {
+            pathToAttachment(source: string) {
+                return path.join(dir, 'allure-report', 'data', 'attachments', source);
+            },
+            parseTestCase: function (uid: string): TestCase {
                 try {
-                    let obj = JSON.parse(
-                        fs.readFileSync(`${dir}\\allure-report\\data\\test-cases\\${uid}.json`).toString()
+                    const obj = JSON.parse(
+                        fs.readFileSync(
+                            path.join(dir, 'allure-report', 'data', 'test-cases', `${uid}.json`)).toString()
                     );
                     if (!obj.testStage) {
-                        return undefined;
+                        throw new Error(`Unknown format, can't find testStage in "${dir}\\allure-report\\data\\test-cases\\${uid}.json"`);
                     }
-                    let steps = obj.testStage.steps;
-                    let prevStepStart = steps[0].time.start;
-                    return steps.reduce((log: string, step: any) => {
-                        let passed = (step.time.start - prevStepStart) / 1000;
-                        return `${log}\n+${passed}s ${step.name}`;
-                    }, '');
+
+                    const steps = obj.testStage.steps;
+                    const firstStepStart = steps[0].time.start;
+                    let attachments: Attachment[] = [];
+
+                    function toLog(step: any): string {
+                        let log = '';
+                        if (step.name) {
+                            // when step.name is present, step.time.start is present as well
+                            let passed = (step.time.start - firstStepStart) / 1000;
+                            log += `\n+${passed}s ${step.name}`;
+                        }
+                        if (step.steps) {
+                            log = step.steps.reduce((log: string, step: any) => {
+                                return `${log}\n${toLog(step)}`;
+                            }, log);
+                        }
+
+                        if (step.attachments) {
+                            attachments = attachments.concat(step.attachments);
+                            step.attachments.forEach((attachment: Attachment) => {
+                                log += `\n>>>>ATTACHMENT ID:${attachment.uid}<<<<\n`;
+                            });
+                        }
+                        return log;
+                    }
+
+                    const log = toLog(obj.testStage);
+                    return {
+                        uid: obj.uid,
+                        log: log,
+                        attachments: attachments,
+                        statusMessage: obj.statusMessage,
+                        statusTrace: obj.statusTrace
+                    };
                 } catch (e) {
-                    log.error(`Error parsing ${uid}`, e);
-                    log.error(`Error reading ${dir}\\allure-report\\data\\test-cases\\${uid}.json`);
-                    return '';
+                    log.error(`Error parsing ${uid} (${dir}\\allure-report\\data\\test-cases\\${uid}.json)`, e);
+                    throw new Error(`Error reading ${dir}\\allure-report\\data\\test-cases\\${uid}.json`);
                 }
-            }
+            },
         };
     }
 
@@ -60,6 +103,13 @@ export class AlluresReportAnalyzer {
 }
 
 
+export interface Attachment {
+    uid: string;
+    name: string;
+    source: string;
+    type: string;
+    size: number;
+}
 export interface Behaviors {
     uid: string;
     children: BehaviorChild[];

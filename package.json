@@ -39,6 +39,11 @@
 						"description": "A path to a local SQLi DB for the project. Project-specific.",
 						"scope": "resource"
 					},
+					"xoQAMaintCIJobAnalyzer.screenshotsPath": {
+						"type": "string",
+						"description": "path where screenshots should be saved. Default to the same folder as the db.",
+						"scope": "resource"
+					},
 					"xoQAMaintCIJobAnalyzer.jenkinsJob": {
 						"type": "string",
 						"default": "",
@@ -48,7 +53,7 @@
 					"xoQAMaintCIJobAnalyzer.pathFromRoot": {
 						"type": "string",
 						"default": "e2e/test-suites",
-						"description": "path where test suites are suited. Default to e2e/test-suites.",
+						"description": "path where test suites are suited in the project. Default to e2e/test-suites.",
 						"scope": "resource"
 					}
 				}
