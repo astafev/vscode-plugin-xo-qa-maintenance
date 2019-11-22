@@ -17,6 +17,9 @@ export interface TestCase {
     statusTrace?: string;
 }
 
+export const ATTACHMENT_SECTION_START = '\n>>>>ATTACHMENT ID:';
+export const ATTACHMENT_SECTION_END = '<<<<\n';
+
 export class AlluresReportAnalyzer {
     private log = makeLogger();
 
@@ -54,14 +57,14 @@ export class AlluresReportAnalyzer {
                         }
                         if (step.steps) {
                             log = step.steps.reduce((log: string, step: any) => {
-                                return `${log}\n${toLog(step)}`;
+                                return `${log}${toLog(step)}`;
                             }, log);
                         }
 
                         if (step.attachments) {
                             attachments = attachments.concat(step.attachments);
                             step.attachments.forEach((attachment: Attachment) => {
-                                log += `\n>>>>ATTACHMENT ID:${attachment.uid}<<<<\n`;
+                                log += `${ATTACHMENT_SECTION_START}${attachment.uid}${ATTACHMENT_SECTION_END}`;
                             });
                         }
                         return log;

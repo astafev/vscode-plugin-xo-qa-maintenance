@@ -4,6 +4,7 @@ import { TestCaseRun } from "../dto/testCaseRun";
 import { IdTitle } from "../dto/idTitle";
 import * as _ from "lodash";
 import { Configuration } from "../vscode/configuration";
+import { Attachment } from "../jenkins/allure-analyze";
 
 export class InfoProvider extends SqlUtil {
     private static _instance: InfoProvider;
@@ -40,6 +41,10 @@ export class InfoProvider extends SqlUtil {
         return _.get(result, 'user_comment', undefined);
     }
 
+    public getAttachments(tcUid: string): Attachment[] {
+        return this.db.prepare(`SELECT * FROM attachments WHERE test_case_uid = ?`).all(tcUid);
+    }
+
     public requestLastTestCaseRuns(tcId: number, limit = 5): TestCaseRun[] {
         let results: any[] = this.db.prepare(`SELECT * FROM test_result WHERE test_case_id = ?
         ORDER BY ci_run_id DESC
@@ -53,7 +58,8 @@ export class InfoProvider extends SqlUtil {
                 duration: val.duration as number,
                 revision: val.revision as string,
                 console: val.console as string,
-                comment: val.user_comment as string
+                comment: val.user_comment as string,
+                attachments: this.getAttachments(val.uid)
             } as TestCaseRun;
         });
     }

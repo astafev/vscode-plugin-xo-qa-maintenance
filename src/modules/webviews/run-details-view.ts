@@ -4,12 +4,45 @@ import { AbstractWebView } from "./abstract-web-view";
 import humanizeDuration = require("humanize-duration");
 import { makeLogger } from "../../utils";
 import * as vscode from 'vscode';
+import * as path from 'path';
+import { TestCaseRun } from "../dto/testCaseRun";
+import { ATTACHMENT_SECTION_START, ATTACHMENT_SECTION_END, Attachment } from "../jenkins/allure-analyze";
+import { Configuration } from "../vscode/configuration";
 let htmlencode = require('htmlencode').htmlEncode;
 
 export class RunDetailsWebView extends AbstractWebView {
     private log = makeLogger();
     constructor(private details: TestCaseDetails, private error?: string) {
         super();
+    }
+
+    private importAttachment(attachmentUid: string, run: TestCaseRun, webview: vscode.Webview) {
+        const attachment = run.attachments.find(a => {
+            return a.uid === attachmentUid;
+        });
+        if (!attachment) {
+            this.log.error(`Error: can't find an attachment ${attachmentUid} in run ${JSON.stringify(run)}`);
+            return '';
+        }
+        const onDiskPath = vscode.Uri.file(path.join(Configuration.projectConfig.screenshotsPath, attachment.source));
+        const url = webview.asWebviewUri(onDiskPath);
+        return `\n\n${attachment.name}:\n<img src="${url}" alt="${attachment.name}">`;
+    }
+
+    private printLog(run: TestCaseRun, webview: vscode.Webview) {
+        let processedLog = '';
+        let currentIdx = 0;
+
+        const log = run.console;
+        let startIdx = -1;
+        while ((startIdx = log.indexOf(ATTACHMENT_SECTION_START, currentIdx)) !== -1) {
+            const endIdx = log.indexOf(ATTACHMENT_SECTION_END, startIdx + ATTACHMENT_SECTION_START.length);
+            const id = log.substring(startIdx + ATTACHMENT_SECTION_START.length, endIdx);
+            processedLog += htmlencode(log.substring(currentIdx, startIdx)) + this.importAttachment(id, run, webview);
+            currentIdx = endIdx + ATTACHMENT_SECTION_END.length;
+        }
+        processedLog += htmlencode(log.substring(currentIdx));
+        return processedLog;
     }
 
     public generateHtml(webview: vscode.Webview) {
@@ -54,7 +87,7 @@ export class RunDetailsWebView extends AbstractWebView {
     </p>
     <p>
         <h3>Execution log</h3>
-        <pre>${htmlencode(htmlencode(lastRun.console))}</pre>
+        <pre>${this.printLog(lastRun, webview)}</pre>
     </p>
 
     <script nonce="${nonce}">

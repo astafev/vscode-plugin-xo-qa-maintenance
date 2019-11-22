@@ -1,3 +1,5 @@
+import { Attachment } from "../jenkins/allure-analyze";
+
 export interface TestCaseRun {
     uid: string;
     ci_run_id: number;
@@ -7,4 +9,5 @@ export interface TestCaseRun {
     revision: string;
     console: string;
     comment: string;
+    attachments: Attachment[];
 }
