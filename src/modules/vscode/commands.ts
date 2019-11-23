@@ -153,17 +153,6 @@ export class IdeCommands {
         });
     }
 
-    public showInTreeView(editor: vscode.TextEditor) {
-        let idTitle: IdTitle;
-        this.log.info(`Generating a web view`);
-        try {
-            idTitle = TextUtil.getTitle(editor);
-        } catch (e) {
-            this.error(`Can't parse the test file.`);
-            return;
-        }
-        throw "Not Ready";
-    }
     public createAWebViewFromEditor(editor: vscode.TextEditor) {
         let idTitle: IdTitle;
         this.log.info(`Generating a web view`);

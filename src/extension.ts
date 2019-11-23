@@ -58,13 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
 			unhandledError(e);
 		}
 	}));
-	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showInTreeView`, async (editor, edit) => {
-		try {
-			myCommands.showInTreeView(editor);
-		} catch (e) {
-			unhandledError(e);
-		}
-	}));
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.protractorRun`, (editor, edit) => {
 		try {
 			ProtractorRun.run(editor);

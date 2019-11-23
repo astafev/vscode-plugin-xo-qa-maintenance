@@ -43,7 +43,7 @@ export class TreeView implements vscode.TreeDataProvider<MyTreeItem> {
         if (this.treeView) {
             let item = this.itemsCache.get(fileName);
             if (item) {
-                this.treeView.reveal(item, {});
+                this.treeView.reveal(item, { expand: 1 });
             } else {
                 // the part of tree is not inited yet, try to walk manually to the correct items
                 let pathStack = [fileName];
@@ -81,11 +81,19 @@ export class TreeView implements vscode.TreeDataProvider<MyTreeItem> {
     }
 
     private openResource(resource: string, line: number = 1): void {
-        let position = new vscode.Position(line, 0);
+        const position = new vscode.Position(line, 0);
         vscode.window.showTextDocument(vscode.Uri.file(resource), {
             selection: new vscode.Range(position, position)
         });
+
+        if (line === 1) {
+            const item = this.itemsCache.get(resource);
+            if (item && this.treeView) {
+                this.treeView.reveal(item, { expand: 1 });
+            }
+        }
     }
+
     refresh() {
         this._onDidChangeTreeData.fire();
     }
