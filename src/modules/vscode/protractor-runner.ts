@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileTreeItem } from './tree-view/fileItem';
-import { TreeViewItem } from './tree-view/treeView';
+import { MyTreeItem } from './tree-view/treeView';
 import { TestTreeItem } from './tree-view/testItem';
 import { TextUtil } from './text-util';
+import { updateFor } from 'typescript';
 
 /** a lot is borrowed from https://github.com/lnaie/vscode-protractor-test-runner/blob/master/src/extension.ts */
 export namespace ProtractorRun {
@@ -12,7 +13,7 @@ export namespace ProtractorRun {
     let process: any = null;
     let commandOutput: vscode.OutputChannel = vscode.window.createOutputChannel('ProtractorTestRunnerLog');
 
-    export function runTreeView(item: TreeViewItem) {
+    export function runTreeView(item: MyTreeItem) {
         if (item instanceof FileTreeItem) {
             let fileItem = item as FileTreeItem;
             if (fileItem.isDirectory) {
@@ -26,6 +27,13 @@ export namespace ProtractorRun {
         }
     }
 
+    export function run(editor: vscode.TextEditor | MyTreeItem) {
+        if(editor instanceof FileTreeItem || editor instanceof TestTreeItem) {
+            return runTreeView(editor as MyTreeItem);
+        } else {
+            return runFromEditor(editor as vscode.TextEditor);
+        }
+    }
     export function runFromEditor(editor: vscode.TextEditor) {
         const test = TextUtil.getTitle(editor);
         ProtractorRun.startProcess(editor.document.uri.toString(), `${test.title}`);

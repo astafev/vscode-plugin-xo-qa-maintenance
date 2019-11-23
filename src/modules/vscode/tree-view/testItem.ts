@@ -1,15 +1,18 @@
-import { TreeViewItem, TreeView } from "./treeView";
+import { MyTreeItem, TreeView } from "./treeView";
 import * as vscode from 'vscode';
 import { TextUtil } from "../text-util";
 import * as path from 'path';
 import { InfoProvider } from "../../db/info-provider";
+import { FileTreeItem } from "./fileItem";
+import { file } from "tmp";
 
-export class TestTreeItem implements TreeViewItem {
+export class TestTreeItem implements MyTreeItem {
     public readonly id: number;
 
     constructor(public readonly testName: string,
         public readonly fileName: string,
-        private line: number) {
+        private line: number,
+        private parent: FileTreeItem) {
         this.id = TextUtil.parseTestCaseIdFromTitle(testName);
     }
 
@@ -39,7 +42,7 @@ export class TestTreeItem implements TreeViewItem {
         return InfoProvider.instance.getInfoForTreeView(this.id);
     }
 
-    getChildren(): Promise<TreeViewItem[]> {
+    getChildren(): Promise<MyTreeItem[]> {
         return Promise.resolve([]);
     }
 
@@ -47,10 +50,14 @@ export class TestTreeItem implements TreeViewItem {
         return `it(${this.testName})`;
     }
 
-    static async parseFile(file: string): Promise<TestTreeItem[]> {
-        let e2e = await TextUtil.fromPath(file);
+    getParent() {
+        return this.parent as MyTreeItem;
+    }
+
+    static async parseFile(fileItem: FileTreeItem): Promise<TestTreeItem[]> {
+        let e2e = await TextUtil.fromPath(fileItem.filePath);
         return e2e.getAllTests().map(itFn => {
-            return new TestTreeItem(itFn.title, file, itFn.line);
+            return new TestTreeItem(itFn.title, fileItem.filePath, itFn.line, fileItem);
         });
     }
 }

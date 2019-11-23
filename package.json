@@ -81,10 +81,6 @@
 				"title": "Show TC Info"
 			},
 			{
-				"command": "xoQAMaintCIJobAnalyzer.openFile",
-				"title": "Open File"
-			},
-			{
 				"command": "xoQAMaintCIJobAnalyzer.protractorRun",
 				"title": "Run"
 			},
