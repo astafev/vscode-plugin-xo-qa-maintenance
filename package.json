@@ -73,6 +73,10 @@
 				"title": "XO.Maint: Show TC Info"
 			},
 			{
+				"command": "xoQAMaintCIJobAnalyzer.showInTreeView",
+				"title": "XO.Maint: Show In Tree View"
+			},
+			{
 				"command": "xoQAMaintCIJobAnalyzer.showTCInfo2",
 				"title": "Show TC Info"
 			},
@@ -96,6 +100,16 @@
 			"editor/context": [
 				{
 					"command": "xoQAMaintCIJobAnalyzer.showTCInfo",
+					"when": "editorLangId == typescript",
+					"group": "xoQAMaintCIJobAnalyzer@1"
+				},
+				{
+					"command": "xoQAMaintCIJobAnalyzer.showInTreeView",
+					"when": "editorLangId == typescript",
+					"group": "xoQAMaintCIJobAnalyzer@1"
+				},
+				{
+					"command": "xoQAMaintCIJobAnalyzer.protractorRun",
 					"when": "editorLangId == typescript",
 					"group": "xoQAMaintCIJobAnalyzer@1"
 				}

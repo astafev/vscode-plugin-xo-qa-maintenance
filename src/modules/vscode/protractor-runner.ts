@@ -3,6 +3,7 @@ import * as path from 'path';
 import { FileTreeItem } from './tree-view/fileItem';
 import { TreeViewItem } from './tree-view/treeView';
 import { TestTreeItem } from './tree-view/testItem';
+import { TextUtil } from './text-util';
 
 /** a lot is borrowed from https://github.com/lnaie/vscode-protractor-test-runner/blob/master/src/extension.ts */
 export namespace ProtractorRun {
@@ -11,7 +12,7 @@ export namespace ProtractorRun {
     let process: any = null;
     let commandOutput: vscode.OutputChannel = vscode.window.createOutputChannel('ProtractorTestRunnerLog');
 
-    export function run(item: TreeViewItem) {
+    export function runTreeView(item: TreeViewItem) {
         if (item instanceof FileTreeItem) {
             let fileItem = item as FileTreeItem;
             if (fileItem.isDirectory) {
@@ -23,6 +24,11 @@ export namespace ProtractorRun {
             let itItem = item as TestTreeItem;
             ProtractorRun.startProcess(itItem.fileName, `${itItem.id}`);
         }
+    }
+
+    export function runFromEditor(editor: vscode.TextEditor) {
+        const test = TextUtil.getTitle(editor);
+        ProtractorRun.startProcess(editor.document.uri.toString(), `${test.title}`);
     }
 
     export function startProcess(filePath: string, grep?: string) {

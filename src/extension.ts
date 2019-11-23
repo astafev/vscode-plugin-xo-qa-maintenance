@@ -15,15 +15,22 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 	const log = makeLogger();
 
-	const commands = new IdeCommands();
+	const myCommands = new IdeCommands();
 	Configuration.init();
 
+	const treeView = new TreeView(context);
+	vscode.window.registerTreeDataProvider('testsExplorer', treeView);
+	
 	newCommand('pullTheBuilds', () => {
-		return commands.pullTheBuildsCmd();
+		return myCommands.pullTheBuildsCmd().then(()=>{
+			return treeView.refresh();
+		});
 	});
 	
 	newCommand('pullCiBuilds...', () => {
-		return commands.pullCiBuildsCmd();
+		return myCommands.pullCiBuildsCmd().then(()=>{
+			return treeView.refresh();
+		});
 	});
 
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
@@ -32,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 	newCommand('showTCInfo2', (item) => {
 		if (item instanceof TestTreeItem) {
 			try {
-				commands.createAWebViewFromIdTitle({
+				myCommands.createAWebViewFromIdTitle({
 					id: item.id,
 					title: item.testName,
 				});
@@ -43,21 +50,33 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showTCInfo`, (editor, edit) => {
 		try {
-			commands.createAWebViewFromEditor(editor);
+			myCommands.createAWebViewFromEditor(editor);
+		} catch (e) {
+			unhandledError(e);
+		}
+	}));
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.showInTreeView`, async (editor, edit) => {
+		try {
+			myCommands.showInTreeView(editor);
+		} catch (e) {
+			unhandledError(e);
+		}
+	}));
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.protractorRun`, (editor, edit) => {
+		try {
+			ProtractorRun.runFromEditor(editor);
 		} catch (e) {
 			unhandledError(e);
 		}
 	}));
 
 	log.debug('Creating a tree view');
-	let treeView = new TreeView(context);
-	vscode.window.registerTreeDataProvider('testsExplorer', treeView);
 	newCommand('refreshNode', (el) => treeView.refreshNode(el));
-	newCommand('protractorRun', ProtractorRun.run);
+	newCommand('protractorRun', ProtractorRun.runTreeView);
 
 	function unhandledError(e: any) {
 		log.error(`Error occured! Uncaught exception. `, e);
-		commands.error(`Uncaught exception. ${e}`);
+		myCommands.error(`Uncaught exception. ${e}`);
 	}
 	process.on('uncaughtException', unhandledError);
 	process.on('unhandledRejection', unhandledError);

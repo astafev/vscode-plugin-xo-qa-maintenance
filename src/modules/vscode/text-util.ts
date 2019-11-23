@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as _ from 'lodash';
-import { TextDocument, Selection, TextDocumentContentProvider } from "vscode";
+import { TextDocument, Selection, TextDocumentContentProvider, TextEditor } from "vscode";
 import { IdTitle } from "../dto/idTitle";
 import { makeLogger } from '../../utils';
 import * as fs from 'fs';
@@ -148,6 +148,10 @@ export class TextUtil {
     static fromTextDocument(document: TextDocument) {
         return new E2eFile(document.uri.toString(),
             document.getText());
+    }
+
+    static getTitle(editor: TextEditor): IdTitle {
+        return TextUtil.fromTextDocument(editor.document).getTestCase(editor.selection);
     }
 
     static async fromPath(uri: string) {

@@ -38,7 +38,7 @@ export class IdeCommands {
             return;
         }
         let builds = parseRange(buildsInput);
-        this.pullTheBuilds(builds);
+        return this.pullTheBuilds(builds);
     }
 
     public async pullNLastBuildsCmd() {
@@ -57,7 +57,7 @@ export class IdeCommands {
             this.error(`Please define a number, can't parse "${buildsInput}"`);
             return;
         }
-        this.pullNLastBuilds(builds);
+        return this.pullNLastBuilds(builds);
     }
 
     /** */
@@ -76,7 +76,7 @@ export class IdeCommands {
         const api = this.getApi();
         const builds = await api.getLastNFinishedBuilds(n);
         this.information(`Goind to pull builds ${builds.join(',')}`);
-        this.pullTheBuilds(builds);
+        return this.pullTheBuilds(builds);
     }
 
     private pullTheBuilds(buildIds: number[]) {
@@ -153,11 +153,22 @@ export class IdeCommands {
         });
     }
 
+    public showInTreeView(editor: vscode.TextEditor) {
+        let idTitle: IdTitle;
+        this.log.info(`Generating a web view`);
+        try {
+            idTitle = TextUtil.getTitle(editor);
+        } catch (e) {
+            this.error(`Can't parse the test file.`);
+            return;
+        }
+        throw "Not Ready";
+    }
     public createAWebViewFromEditor(editor: vscode.TextEditor) {
         let idTitle: IdTitle;
         this.log.info(`Generating a web view`);
         try {
-            idTitle = TextUtil.fromTextDocument(editor.document).getTestCase(editor.selection);
+            idTitle = TextUtil.getTitle(editor);
         } catch (e) {
             this.error(`Can't parse the test file.`);
             return;
