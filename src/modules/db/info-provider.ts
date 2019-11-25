@@ -42,7 +42,7 @@ export class InfoProvider extends SqlUtil {
     }
 
     public getAttachments(tcUid: string): Attachment[] {
-        return this.db.prepare(`SELECT * FROM attachments WHERE test_case_uid = ?`).all(tcUid);
+        return this.db.prepare(`SELECT * FROM attachments WHERE test_result_uid = ?`).all(tcUid);
     }
 
     public requestLastTestCaseRuns(tcId: number, limit = 5): TestCaseRun[] {

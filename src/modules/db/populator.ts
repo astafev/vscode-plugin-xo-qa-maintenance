@@ -41,7 +41,7 @@ export class DbPopulator extends SqlUtil {
     private saveAttachments(report: AllureReport, testCase: TestCase) {
 
         let stmt = this.db.prepare(`INSERT OR REPLACE INTO attachments
-        (uid, name, type, source, size, test_case_uid)
+        (uid, name, type, source, size, test_result_uid)
         VALUES
         (?, ?, ?, ?, ?, ?)`);
         const screenshotsPath = Configuration.projectConfig.screenshotsPath;

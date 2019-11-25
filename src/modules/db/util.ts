@@ -6,9 +6,9 @@ export class SqlUtil {
 
     constructor() {
         this.db = new Sqlite(Configuration.projectConfig.db);
-     }
+    }
 
-     public reset() {
-         this.db = new Sqlite(Configuration.projectConfig.db);
-     }
+    public reset() {
+        this.db = new Sqlite(Configuration.projectConfig.db);
+    }
 }
