@@ -14,6 +14,7 @@ export interface ProjecConfig {
 export interface CommonConfig {
     jenkinsUser: string;
     jenkinsToken: string;
+    dataRetentionPolicy: string;
 }
 
 export class Configuration {
@@ -57,8 +58,9 @@ export class Configuration {
 
         let commonConfig = {
             jenkinsUser: config.get('jenkinsUser', ''),
-            jenkinsToken: config.get('jenkinsToken', '')
-        };
+            jenkinsToken: config.get('jenkinsToken', ''),
+            dataRetentionPolicy: config.get('dataRetentionPolicy'),
+        } as CommonConfig;
         this.log.debug(`The project config`, projectConfig);
         return {
             projectConfig, commonConfig

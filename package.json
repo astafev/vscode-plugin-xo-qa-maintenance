@@ -55,6 +55,12 @@
 						"default": "e2e/test-suites",
 						"description": "path where test suites are suited in the project. Default to e2e/test-suites.",
 						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.dataRetentionPolicy": {
+						"type": "string",
+						"default": "REMOVE_OLDER_THAN 1 month",
+						"description": "path where test suites are suited in the project. Default to e2e/test-suites.",
+						"scope": "resource"
 					}
 				}
 			}
@@ -85,6 +91,10 @@
 				"title": "Run"
 			},
 			{
+				"command": "xoQAMaintCIJobAnalyzer.protractorRunFromEditor",
+				"title": "Run"
+			},
+			{
 				"command": "xoQAMaintCIJobAnalyzer.refreshNode",
 				"title": "Refresh"
 			}
@@ -98,7 +108,7 @@
 					"group": "xoQAMaintCIJobAnalyzer@1"
 				},
 				{
-					"command": "xoQAMaintCIJobAnalyzer.protractorRun",
+					"command": "xoQAMaintCIJobAnalyzer.protractorRunFromEditor",
 					"when": "editorLangId == typescript",
 					"group": "xoQAMaintCIJobAnalyzer@1"
 				}
@@ -177,6 +187,7 @@
 		"mkdirp": "^0.5.1",
 		"node-sqlite-purejs": "0.0.2",
 		"rimraf": "^3.0.0",
+		"parse-duration": "0.1.1",
 		"spawn-command": "0.0.2-1",
 		"tmp": "^0.1.0",
 		"tree-kill": "^1.2.1",

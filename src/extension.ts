@@ -5,6 +5,7 @@ import { TreeView } from './modules/vscode/tree-view/treeView';
 import { ProtractorRun } from './modules/vscode/protractor-runner';
 import { TestTreeItem } from './modules/vscode/tree-view/testItem';
 import { Configuration } from './modules/vscode/configuration';
+import { CleanUpUtils } from './modules/db/data-retention-policy';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -15,13 +16,18 @@ export function activate(context: vscode.ExtensionContext) {
 	const log = makeLogger();
 
 	const myCommands = new IdeCommands();
-	Configuration.init();
+	Configuration.init().then(() => {
+		// functions to be run on init that require configuration to be ready
+
+		CleanUpUtils.cleanUp();
+        Configuration.registerCallbackOnUpdate(CleanUpUtils.cleanUp);
+	});
 
 	const treeDataProvider = new TreeView(context);
 	//vscode.window.registerTreeDataProvider('testsExplorer', treeView);
 	let treeView = vscode.window.createTreeView('testsExplorer', { treeDataProvider });
 	treeDataProvider.treeView = treeView;
-	
+
 
 
 	newCommand('pullTheBuilds', () => {
@@ -58,19 +64,19 @@ export function activate(context: vscode.ExtensionContext) {
 			unhandledError(e);
 		}
 	}));
-	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.protractorRun`, (editor, edit) => {
+	context.subscriptions.push(vscode.commands.registerTextEditorCommand(`${PREFIX}.protractorRunFromEditor`, (editor, edit) => {
 		try {
-			ProtractorRun.run(editor);
+			ProtractorRun.runFromEditor(editor);
 		} catch (e) {
 			unhandledError(e);
 		}
 	}));
-	/*newCommand('protractorRun', (el)=> {
+	newCommand('protractorRun', (el)=> {
 		return ProtractorRun.runTreeView(el);
-	});*/
+	});
 
 	newCommand('refreshNode', (el) => treeDataProvider.refreshNode(el));
-	
+
 
 	function unhandledError(e: any) {
 		log.error(`Error occured! Uncaught exception. `, e);

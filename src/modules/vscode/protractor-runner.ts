@@ -36,7 +36,7 @@ export namespace ProtractorRun {
     }
     export function runFromEditor(editor: vscode.TextEditor) {
         const test = TextUtil.getTitle(editor);
-        ProtractorRun.startProcess(editor.document.uri.toString(), `${test.title}`);
+        ProtractorRun.startProcess(editor.document.fileName, `${test.id}`);
     }
 
     export function startProcess(filePath: string, grep?: string) {
