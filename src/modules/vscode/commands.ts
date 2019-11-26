@@ -164,9 +164,15 @@ export class IdeCommands {
         }
         return this.createAWebViewFromIdTitle(idTitle);
     }
+
+    // TODO refactor?
+    private existingPanel?: vscode.WebviewPanel;
     public createAWebViewFromIdTitle(idTitle: IdTitle) {
         this.log.debug(`id = ${idTitle.id}, title = ${idTitle.title}`);
-        const panel = vscode.window.createWebviewPanel(
+        if (this.existingPanel) {
+            this.existingPanel.dispose();
+        }
+        this.existingPanel = vscode.window.createWebviewPanel(
             'testCaseDetails',
             `${idTitle.id} "${idTitle.title}"`,
             vscode.ViewColumn.Beside,
@@ -180,8 +186,8 @@ export class IdeCommands {
 
         try {
             let details = this.getDbInfoProvider().getTestCaseRunDetails(idTitle);
-            panel.webview.html = new RunDetailsWebView(details).generateHtml(panel.webview);
-            panel.webview.onDidReceiveMessage(message => {
+            this.existingPanel.webview.html = new RunDetailsWebView(details).generateHtml(this.existingPanel.webview);
+            this.existingPanel.webview.onDidReceiveMessage(message => {
                 this.log.info(`Received a message. ${JSON.stringify(message)}`);
                 switch (message.command) {
                     case 'commentUpdate':
@@ -190,8 +196,8 @@ export class IdeCommands {
                 }
             });
         } catch (e) {
-            console.log(e);
-            panel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml(panel.webview);
+            this.log.error(e);
+            this.existingPanel.webview.html = new RunDetailsWebView({} as TestCaseDetails).generateHtml(this.existingPanel.webview);
         }
     }
 

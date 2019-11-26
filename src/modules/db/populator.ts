@@ -9,11 +9,6 @@ import { Configuration } from "../vscode/configuration";
 export class DbPopulator extends SqlUtil {
     private log = makeLogger();
 
-    constructor() {
-        super();
-        this.checkInited();
-    }
-
     public async store(content: CIBuild) {
         this.log.info(`Saving build ${content.getId()} to the db.`);
         //this.db.serialize();
@@ -116,17 +111,5 @@ export class DbPopulator extends SqlUtil {
     public updateComment(uid: string, comment: string) {
         let stmt = this.db.prepare(`UPDATE test_result SET user_comment = ? WHERE uid = ?`);
         stmt.run(comment, uid);
-    }
-
-    public checkInited() {
-        let stmt = this.db.prepare(`SELECT name
-    FROM sqlite_master
-    WHERE
-        type='table' and name='ci_run'`);
-        let row = stmt.get();
-        if (row === undefined) {
-            const sqlInit = fs.readFileSync('./responsetek.db.sql').toString('UTF-8');
-            this.db.exec(sqlInit);
-        }
     }
 }

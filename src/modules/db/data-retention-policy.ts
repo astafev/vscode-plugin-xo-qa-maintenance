@@ -131,14 +131,19 @@ export class CleanUpUtils {
             log.warn(`Error parsing configuration: ${e}`);
             return;
         }
-        const toDelete = this.pullItemsForDeletion();
-        if (_.isEmpty(toDelete.individualTestResults) && _.isEmpty(toDelete.ciRuns)) {
-            log.debug(`Not cleaning up anything yet. ${JSON.stringify(this.policies)}`);
-            return;
-        } else {
-            log.info(`Going to clean up the following: ${JSON.stringify(toDelete)}`);
+        try {
+            const toDelete = CleanUpUtils.pullItemsForDeletion();
+            if (_.isEmpty(toDelete.individualTestResults) && _.isEmpty(toDelete.ciRuns)) {
+                log.debug(`Not cleaning up anything yet. ${JSON.stringify(this.policies)}`);
+                return;
+            } else {
+                log.info(`Going to clean up the following: ${JSON.stringify(toDelete)}`);
+            }
+            new CleanUpUtilsSql(toDelete).cleanUp();
+        } catch(e) {
+            // TODO happens when the db does not exist, it can be checked
+            log.warn(`Error performing clean up ${e}`);
         }
-        new CleanUpUtilsSql(toDelete).cleanUp();
     }
 
     private static pullItemsForDeletion(): Items4Deletion {

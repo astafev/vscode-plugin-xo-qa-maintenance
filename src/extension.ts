@@ -6,6 +6,7 @@ import { ProtractorRun } from './modules/vscode/protractor-runner';
 import { TestTreeItem } from './modules/vscode/tree-view/testItem';
 import { Configuration } from './modules/vscode/configuration';
 import { CleanUpUtils } from './modules/db/data-retention-policy';
+import { SqlUtil } from './modules/db/util';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -18,9 +19,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const myCommands = new IdeCommands();
 	Configuration.init().then(() => {
 		// functions to be run on init that require configuration to be ready
-
-		CleanUpUtils.cleanUp();
-        Configuration.registerCallbackOnUpdate(CleanUpUtils.cleanUp);
+		if (Configuration.projectConfig.db) {
+			new SqlUtil().checkInited(context);
+			CleanUpUtils.cleanUp();
+			Configuration.registerCallbackOnUpdate(CleanUpUtils.cleanUp);
+		}
 	});
 
 	const treeDataProvider = new TreeView(context);
@@ -71,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
 			unhandledError(e);
 		}
 	}));
-	newCommand('protractorRun', (el)=> {
+	newCommand('protractorRun', (el) => {
 		return ProtractorRun.runTreeView(el);
 	});
 
