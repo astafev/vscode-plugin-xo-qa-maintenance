@@ -132,11 +132,11 @@ export class CleanUpUtils {
             return;
         }
         const toDelete = this.pullItemsForDeletion();
-        if (toDelete.individualTestResults || toDelete.ciRuns) {
-            log.info(`Going to clean up the following: ${JSON.stringify(toDelete)}`);
-        } else {
+        if (_.isEmpty(toDelete.individualTestResults) && _.isEmpty(toDelete.ciRuns)) {
             log.debug(`Not cleaning up anything yet. ${JSON.stringify(this.policies)}`);
             return;
+        } else {
+            log.info(`Going to clean up the following: ${JSON.stringify(toDelete)}`);
         }
         new CleanUpUtilsSql(toDelete).cleanUp();
     }

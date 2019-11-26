@@ -32,7 +32,7 @@ export class TreeView implements vscode.TreeDataProvider<MyTreeItem> {
             this.activeFile = vscode.window.activeTextEditor.document.fileName;
         }
         vscode.window.onDidChangeActiveTextEditor(e => {
-            if (e) {
+            if (e && this.activeFile !== e.document.fileName) {
                 this.activeFile = e.document.fileName;
                 this.openDocument(this.activeFile);
             }
@@ -82,16 +82,18 @@ export class TreeView implements vscode.TreeDataProvider<MyTreeItem> {
 
     private openResource(resource: string, line: number = 1): void {
         const position = new vscode.Position(line, 0);
-        vscode.window.showTextDocument(vscode.Uri.file(resource), {
-            selection: new vscode.Range(position, position)
+        const existing = vscode.window.visibleTextEditors.find(editor => {
+            return editor.document.fileName === resource;
         });
-
-        if (line === 1) {
-            const item = this.itemsCache.get(resource);
-            if (item && this.treeView) {
-                this.treeView.reveal(item, { expand: 1 });
-            }
+        let options: vscode.TextDocumentShowOptions = {
+            selection: new vscode.Range(position, position),
+        };
+        if (existing) {
+            options.viewColumn = existing.viewColumn;
+        } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName === 'tasks') {
+            options.viewColumn = vscode.window.activeTextEditor.viewColumn ? vscode.window.activeTextEditor.viewColumn - 1 : vscode.ViewColumn.One;
         }
+        vscode.window.showTextDocument(vscode.Uri.file(resource), options);
     }
 
     refresh() {

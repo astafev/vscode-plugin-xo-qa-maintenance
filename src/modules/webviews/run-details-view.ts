@@ -77,6 +77,7 @@ export class RunDetailsWebView extends AbstractWebView {
         <button onclick="saveComment()">Update comment</button>    
         <span id="successMsg" style="color: limegreen; display: none;">Successfully saved</span>
         <span id="errorMsg" style="color: red; display: none;">Error!</span>
+        <span id="inProcessMsg" style="display: none;">Saving...</span>
     </p>
     <hr>
     <h2>Build <a href="http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/${lastRun.ci_run_id}/">#${lastRun.ci_run_id}</a>.
