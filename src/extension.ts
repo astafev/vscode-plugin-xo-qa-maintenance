@@ -7,6 +7,8 @@ import { TestTreeItem } from './modules/vscode/tree-view/testItem';
 import { Configuration } from './modules/vscode/configuration';
 import { CleanUpUtils } from './modules/db/data-retention-policy';
 import { SqlUtil } from './modules/db/util';
+import { CodelensProvider } from './modules/vscode/codeLens';
+import { TextUtil } from './modules/vscode/text-util';
 
 export const PREFIX: string = 'xoQAMaintCIJobAnalyzer';
 
@@ -89,10 +91,20 @@ export function activate(context: vscode.ExtensionContext) {
 	process.on('unhandledRejection', unhandledError);
 
 
-	// TODO actions right in the code:
-	// https://github.com/gabduss/runProtractorVsCodeExtension/blob/master/src/extension.ts
-
-	// context.subscriptions.push(vscode.languages.registerCodeLensProvider())
+	vscode.languages.registerCodeLensProvider("typescript", new CodelensProvider());
+	newCommand('protractorRunFromCodeLens', (filename, id) => {
+		return ProtractorRun.startProcess(filename, id);
+	});
+	newCommand('showTcInfoFromCodeLens', (title) => {
+		try {
+			myCommands.createAWebViewFromIdTitle({
+				id: TextUtil.parseTestCaseIdFromTitle(title),
+				title: title
+			});
+		} catch (e) {
+			unhandledError(e);
+		}
+	});
 }
 
 

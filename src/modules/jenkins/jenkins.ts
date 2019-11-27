@@ -46,7 +46,7 @@ export class JenkinsAPI {
             }
         }
 
-        if (res.result === null) {
+        if (!res.result || res.result.result === null) {
             console.log(res.result);
             throw new Error('Unknown result');
         }
@@ -70,9 +70,9 @@ export class JenkinsAPI {
 
     public async getLastNFinishedBuilds(n: number): Promise<number[]> {
         const jobInfo = await this.getJobMetaInfo();
-        let buildIds = _.reverse(jobInfo.builds.map(build => {
+        let buildIds = jobInfo.builds.map(build => {
             return build.number;
-        }));
+        });
         let iteratorIdx = 0;
         let results: Promise<number>[] = [];
         function _pull(idx: number, api: JenkinsAPI): Promise<number> {

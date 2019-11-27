@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { makeLogger } from '../../utils';
 import * as path from 'path';
+import { TextUtil } from '../vscode/text-util';
 
 export interface AllureReport {
     behaviors: Behaviors;
@@ -90,18 +91,13 @@ export class AlluresReportAnalyzer {
         let content = fs.readFileSync(`${this.dir}\\allure-report\\data\\behaviors.json`);
         let behaviors: Behaviors = JSON.parse(content.toString());
         behaviors.children.forEach(b => {
-            let caseId = this.getTestCaseId(b.name);
-            b.testCaseId = Number.parseInt(caseId);
+            try {
+                b.testCaseId = TextUtil.parseTestCaseIdFromTitle(b.name);
+            } catch (e) {
+                this.log.warn(`Error parsing test case name: ${b.name}. ${e}`);
+            }
         });
         return behaviors;
-    }
-
-    private getTestCaseId(name: string) {
-        let regexp = new RegExp('\\[(\\d*)\\]').exec(name);
-        if (regexp === null) {
-            throw new Error(`Unknown name: ${name}`);
-        }
-        return regexp[1];
     }
 }
 

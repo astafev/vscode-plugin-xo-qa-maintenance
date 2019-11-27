@@ -31,7 +31,7 @@ export class E2eFile {
             throw new Error(`Not a call expression. ${_callExpression.kind}`);
         }
         let callExpression = (_callExpression as ts.CallExpression);
-        if (callExpression.arguments.length !== 2) {
+        if (callExpression.arguments.length !== 2 && callExpression.arguments.length !== 3) {
             throw new Error(`Not 2 arguments. ${callExpression.arguments.length}`);
         }
         let fnName = (callExpression.expression as ts.Identifier).escapedText;
@@ -142,10 +142,15 @@ export class E2eFile {
     }
 }
 
+// TODO cache results of parsing
 export class TextUtil {
     private log = makeLogger();
 
-    static fromTextDocument(document: TextDocument) {
+    public static parseTextDocument(document: TextDocument): ItFunction[] {
+        return TextUtil.fromTextDocument(document).getAllTests();
+    }
+
+    private static fromTextDocument(document: TextDocument) {
         return new E2eFile(document.uri.toString(),
             document.getText());
     }
@@ -160,7 +165,7 @@ export class TextUtil {
     }
 
     public static parseTestCaseIdFromTitle(title: string) {
-        let result = new RegExp("\w*\\[(\\d+)]").exec(title);
+        let result = new RegExp("\w*\\[C?(\\d+)]").exec(title);
         if (result === null) {
             throw new Error(`Unknown test case name format: ${title}`);
         }

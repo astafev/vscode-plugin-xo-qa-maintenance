@@ -28,7 +28,7 @@ export namespace ProtractorRun {
     }
 
     export function run(editor: vscode.TextEditor | MyTreeItem) {
-        if(editor instanceof FileTreeItem || editor instanceof TestTreeItem) {
+        if (editor instanceof FileTreeItem || editor instanceof TestTreeItem) {
             return runTreeView(editor as MyTreeItem);
         } else {
             return runFromEditor(editor as vscode.TextEditor);

@@ -1,7 +1,11 @@
 {
-	"name": "vscode-plugin-xo-qa-maintenance",
-	"displayName": "vscode-plugin-xo-qa-maintenance",
-	"description": "HelloWorld example for VS Code",
+	"name": "xo-qa-maintenance",
+	"displayName": "Crossover QA Maintenance",
+	"description": "The tool to facilitate protractor test management for QA.Maint team",
+	"publisher": "astafev",
+	"repository": {
+		"url": "https://github.com/astafev/vscode-plugin-xo-qa-maintenance/"
+	},
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.38.0"
@@ -59,7 +63,7 @@
 					"xoQAMaintCIJobAnalyzer.dataRetentionPolicy": {
 						"type": "string",
 						"default": "REMOVE_OLDER_THAN 1 month",
-						"description": "path where test suites are suited in the project. Default to e2e/test-suites.",
+						"description": "How the data should be cleaned.",
 						"scope": "resource"
 					}
 				}
@@ -93,6 +97,14 @@
 			{
 				"command": "xoQAMaintCIJobAnalyzer.protractorRunFromEditor",
 				"title": "Run"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.protractorRunFromCodeLens",
+				"title": "Run"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.showTcInfoFromCodeLens",
+				"title": "Show TC Info"
 			},
 			{
 				"command": "xoQAMaintCIJobAnalyzer.refreshNode",
@@ -173,8 +185,8 @@
 		"ts-loader": "^6.1.1",
 		"tslint": "^5.12.1",
 		"vscode-test": "^1.2.0",
-		"webpack": "^4.40.2",
-		"webpack-cli": "^3.3.9"
+		"webpack": "^4.41.2",
+		"webpack-cli": "^3.3.10"
 	},
 	"dependencies": {
 		"@types/mkdirp": "^0.5.2",

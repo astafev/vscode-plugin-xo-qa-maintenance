@@ -13,6 +13,8 @@ export interface CIBuild {
     getBranch(): string;
     getRevision(): string;
     getAllureReport(): AllureReport;
+    getSpecs(): string;
+    getTestCases(): string;
 }
 
 export class JenkinsBuild implements CIBuild {
@@ -41,18 +43,28 @@ export class JenkinsBuild implements CIBuild {
         return this.build.result;
     }
 
-    getTestSuite(): string {
+    private getParamAction(name: string): string {
         let params: any = this.actionByClass('hudson.model.ParametersAction')[0];
         if (!params.parameters) {
             throw new Error(`Wrong format of params action: ${JSON.stringify(params)}`);
         }
-        let suitesParam = params.parameters.find((param: any) => {
-            return param['name'] === 'SUITES';
+        let paramVal = params.parameters.find((param: any) => {
+            return param['name'] === name;
         });
-        if (!suitesParam) {
-            throw new Error(`Can't find the suites parameter`);
+        if (!paramVal) {
+            throw new Error(`Can't find the ${name} parameter`);
         }
-        return suitesParam['value'];
+        return paramVal['value'];
+    }
+
+    getTestSuite(): string {
+        return this.getParamAction('SUITES');
+    }
+    getSpecs(): string {
+        return this.getParamAction('SPECS');
+    }
+    getTestCases(): string {
+        return this.getParamAction('TEST_CASES');
     }
 
     private actionByClass(clazz: string): any[] {

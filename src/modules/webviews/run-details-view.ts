@@ -80,8 +80,8 @@ export class RunDetailsWebView extends AbstractWebView {
         <span id="inProcessMsg" style="display: none;">Saving...</span>
     </p>
     <hr>
-    <h2>Build <a href="http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/${lastRun.ci_run_id}/">#${lastRun.ci_run_id}</a>.
-    Status: <a href="http://jenkins.aureacentral.com/job/ResponseTek/job/eng-qa-integration/job/common-pipeline/${lastRun.ci_run_id}/allure/#testresult/${lastRun.uid}/"><span style="color: ${lastRun.result === 'passed' ? 'limegreen' : 'red'};">${htmlencode(lastRun.result)}</span></a></h2>
+    <h2>Build <a href="${Configuration.projectConfig.jenkinsJobUrl}/${lastRun.ci_run_id}/">#${lastRun.ci_run_id}</a>.
+    Status: <a href="${Configuration.projectConfig.jenkinsJobUrl}/${lastRun.ci_run_id}/allure/#testresult/${lastRun.uid}/"><span style="color: ${lastRun.result === 'passed' ? 'limegreen' : 'red'};">${htmlencode(lastRun.result)}</span></a></h2>
 
     <p>
         Duration: ${humanizeDuration(lastRun.duration)}

@@ -21,7 +21,7 @@ export class SqlUtil {
         type='table' and name='ci_run'`);
         let row = stmt.get();
         if (row === undefined) {
-            const sqlInit = fs.readFileSync(context.asAbsolutePath('./responsetek.db.sql')).toString('UTF-8');
+            const sqlInit = fs.readFileSync(context.asAbsolutePath('./db-schema.sql')).toString('UTF-8');
             this.db.exec(sqlInit);
         }
     }

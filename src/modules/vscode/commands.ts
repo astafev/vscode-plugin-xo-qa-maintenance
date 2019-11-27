@@ -124,13 +124,13 @@ export class IdeCommands {
                     if (cancelled) {
                         return '';
                     }
-                    progress.report({ increment: 20, message: `Build is fine. Downloading the artefacts...` });
+                    progress.report({ increment: 10, message: `Build is fine. Downloading the artefacts...` });
                     return api.downloadAndUnzip(build, buildId);
                 }).then(dir => {
                     if (cancelled) {
                         return undefined;
                     }
-                    progress.report({ increment: 70, message: `Downloaded. Parsing...` });
+                    progress.report({ increment: 50, message: `Downloaded. Parsing...` });
                     return new JenkinsBuild(
                         build,
                         new AlluresReportAnalyzer(dir).parse());
@@ -138,7 +138,7 @@ export class IdeCommands {
                     if (cancelled || !dto) {
                         return null;
                     }
-                    progress.report({ increment: 85, message: `Parsed. Storing...` });
+                    progress.report({ increment: 15, message: `Parsed. Storing...` });
                     return populator.store(dto);
                 });
             }).catch(err => {

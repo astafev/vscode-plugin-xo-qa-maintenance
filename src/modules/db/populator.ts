@@ -19,9 +19,9 @@ export class DbPopulator extends SqlUtil {
     private async storeCiRun(build: CIBuild) {
         let stmt = this.db.prepare(`INSERT OR REPLACE INTO ci_run
          (id, start_time, duration, result, suite, 
-            console, branch, revision)
+            console, branch, revision, specs, test_cases)
          VALUES (?, ?, ?, ?, ?,
-            ?, ?, ?)`);
+            ?, ?, ?, ?, ?)`);
 
         stmt.run(build.getId(),
             build.getTimestamp(),
@@ -30,7 +30,9 @@ export class DbPopulator extends SqlUtil {
             build.getTestSuite(),
             await build.getConsoleFull(),
             build.getBranch(),
-            build.getRevision());
+            build.getRevision(),
+            build.getSpecs(),
+            build.getTestCases());
     }
 
     private saveAttachments(report: AllureReport, testCase: TestCase) {
