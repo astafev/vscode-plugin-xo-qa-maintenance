@@ -66,7 +66,7 @@ export namespace ProtractorRun {
         }
     }
 
-    export function startProcess(filePath: string, grep?: string, debug = true) {
+    export function startProcess(filePath: string, grep?: string, debug = false) {
         if (debug === true) {
             return startDebug(filePath, grep);
         }

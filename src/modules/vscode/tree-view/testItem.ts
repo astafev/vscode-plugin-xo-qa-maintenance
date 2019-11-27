@@ -4,7 +4,6 @@ import { TextUtil } from "../text-util";
 import * as path from 'path';
 import { InfoProvider } from "../../db/info-provider";
 import { FileTreeItem } from "./fileItem";
-import { file } from "tmp";
 
 export class TestTreeItem implements MyTreeItem {
     public readonly id: number;
@@ -56,7 +55,7 @@ export class TestTreeItem implements MyTreeItem {
 
     static async parseFile(fileItem: FileTreeItem): Promise<TestTreeItem[]> {
         let e2e = await TextUtil.fromPath(fileItem.filePath);
-        return e2e.getAllTests().map(itFn => {
+        return e2e.getAllTests().its.map(itFn => {
             return new TestTreeItem(itFn.title, fileItem.filePath, itFn.line, fileItem);
         });
     }

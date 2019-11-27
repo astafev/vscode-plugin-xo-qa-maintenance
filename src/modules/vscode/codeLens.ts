@@ -9,7 +9,9 @@ export class CodelensProvider implements vscode.CodeLensProvider {
         if (!doc.fileName.endsWith('.e2e-spec.ts')) {
             return;
         }
-        let arrays = TextUtil.parseTextDocument(doc).map(test => {
+        const e2eParsed = TextUtil.parseTextDocument(doc);
+
+        let arrays = e2eParsed.its.map(test => {
             const position = new vscode.Position(test.line, 4);
             const range = new vscode.Range(position, position);
             const id = `${TextUtil.parseTestCaseIdFromTitle(test.title)}`;
@@ -49,6 +51,20 @@ export class CodelensProvider implements vscode.CodeLensProvider {
             }
             return array;
         });
+
+        let range = new vscode.Range(new vscode.Position(e2eParsed.describe.line, 4), new vscode.Position(e2eParsed.describe.line, 4));
+        arrays.push([
+            new vscode.CodeLens(range, {
+                command: "xoQAMaintCIJobAnalyzer.protractorRunFromCodeLens",
+                title: "Run The File",
+                arguments: [doc.fileName, undefined],
+            }),
+            new vscode.CodeLens(range, {
+                command: "xoQAMaintCIJobAnalyzer.protractorDebug",
+                title: "Debug The File",
+                arguments: [doc.fileName, undefined],
+            })
+        ]);
         return _.flatten(arrays);
     }
 

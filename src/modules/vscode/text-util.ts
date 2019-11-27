@@ -5,6 +5,13 @@ import { IdTitle } from "../dto/idTitle";
 import { makeLogger } from '../../utils';
 import * as fs from 'fs';
 
+export interface E2eFileParsed {
+    its: ItFunction[];
+    describe: {
+        line: number
+    };
+}
+
 interface ItFunction {
     title: string;
     body: ts.Block;
@@ -16,7 +23,7 @@ interface ItFunction {
 /** heavy object, drop as soon as possible */
 export class E2eFile {
     private _its?: ItFunction[];
-    private describePosition?: Position;
+    private describeLine?: number;
     constructor(private uri: string, private text: string) {
     }
 
@@ -90,13 +97,14 @@ export class E2eFile {
         throw new Error(`Can't parse the file. Do you have not a e2e file open?`);
     }
 
-    private parse() {
+    private parse(): E2eFileParsed {
 
         let document = this.getDom();
         let describe = this.e2eBody(document);
         let cases = describe.statements.filter(node => {
             return node.kind === ts.SyntaxKind.ExpressionStatement;
         });
+        this.describeLine = document.getLineAndCharacterOfPosition(describe.pos).line;
         let _its: ItFunction[] = cases.map(node => {
             try {
                 return this.describeOrIt(node as ts.ExpressionStatement, document);
@@ -108,16 +116,21 @@ export class E2eFile {
             return el !== null;
         }) as ItFunction[];
         this._its = _its;
-        return _its;
+        return {
+            its: _its,
+            describe: {
+                line: this.describeLine
+            }
+        };
     }
 
     private _getTestCase(selection: Selection): ItFunction {
-
-        if (this._its === undefined) {
-            this._its = this.parse();
+        let its = this._its;
+        if (its === undefined) {
+            its = this.parse().its;
         }
         const line = selection.active.line;
-        for (let it of this._its) {
+        for (let it of its) {
             if (line >= it.line - 1 && line <= it.endLine) {
                 return it;
             }
@@ -135,11 +148,16 @@ export class E2eFile {
         };
     }
 
-    public getAllTests(): ItFunction[] {
+    public getAllTests(): E2eFileParsed {
         if (!this._its) {
-            this._its = this.parse();
+            return this.parse();
         }
-        return this._its;
+        return {
+            its: this._its,
+            describe: {
+                line: this.describeLine || -1
+            }
+        };
     }
 }
 
@@ -147,7 +165,12 @@ export class E2eFile {
 export class TextUtil {
     private log = makeLogger();
 
-    public static parseTextDocument(document: TextDocument): ItFunction[] {
+    public static parseTextDocument(document: TextDocument): {
+        its: ItFunction[],
+        describe: {
+            line: number
+        }
+     } {
         return TextUtil.fromTextDocument(document).getAllTests();
     }
 
