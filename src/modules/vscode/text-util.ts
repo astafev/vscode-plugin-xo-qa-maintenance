@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as _ from 'lodash';
-import { TextDocument, Selection, TextDocumentContentProvider, TextEditor } from "vscode";
+import { TextDocument, Selection, TextEditor, Position } from "vscode";
 import { IdTitle } from "../dto/idTitle";
 import { makeLogger } from '../../utils';
 import * as fs from 'fs';
@@ -16,6 +16,7 @@ interface ItFunction {
 /** heavy object, drop as soon as possible */
 export class E2eFile {
     private _its?: ItFunction[];
+    private describePosition?: Position;
     constructor(private uri: string, private text: string) {
     }
 

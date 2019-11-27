@@ -95,6 +95,9 @@ export function activate(context: vscode.ExtensionContext) {
 	newCommand('protractorRunFromCodeLens', (filename, id) => {
 		return ProtractorRun.startProcess(filename, id);
 	});
+	newCommand('protractorDebug', (filename, id) => {
+		return ProtractorRun.startProcess(filename, id, true);
+	});
 	newCommand('showTcInfoFromCodeLens', (title) => {
 		try {
 			myCommands.createAWebViewFromIdTitle({

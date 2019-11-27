@@ -4,7 +4,7 @@ import { FileTreeItem } from './tree-view/fileItem';
 import { MyTreeItem } from './tree-view/treeView';
 import { TestTreeItem } from './tree-view/testItem';
 import { TextUtil } from './text-util';
-import { updateFor } from 'typescript';
+import { Configuration } from './configuration';
 
 /** a lot is borrowed from https://github.com/lnaie/vscode-protractor-test-runner/blob/master/src/extension.ts */
 export namespace ProtractorRun {
@@ -39,7 +39,37 @@ export namespace ProtractorRun {
         ProtractorRun.startProcess(editor.document.fileName, `${test.id}`);
     }
 
-    export function startProcess(filePath: string, grep?: string) {
+    function startDebug(filePath: string, grep?: string) {
+        if (vscode.workspace.workspaceFolders) {
+            let args = [
+                "${workspaceRoot}/protractor.conf.js",
+                "--specs",
+                filePath
+            ];
+            if (grep) {
+                args = args.concat([
+                    '--grep', grep
+                ]);
+            }
+            let workspaceFolder = vscode.workspace.workspaceFolders[0];
+            return vscode.debug.startDebugging(workspaceFolder, {
+                type: 'node',
+                name: `Run the test ${path.basename(filePath)}: ${grep}`,
+                request: 'launch',
+                program: Configuration.commonConfig.protractorPath,
+                preLaunchTask: "tsc: build - tsconfig.json",
+                outFiles: [
+                    "${workspaceFolder}/dist/out-tsc/**/*.js"
+                ],
+                args: args,
+            } as vscode.DebugConfiguration);
+        }
+    }
+
+    export function startProcess(filePath: string, grep?: string, debug = true) {
+        if (debug === true) {
+            return startDebug(filePath, grep);
+        }
         // Already running one?
         if (process) {
             const msg = 'There is a command running right now. Terminate it before executing a new command?';

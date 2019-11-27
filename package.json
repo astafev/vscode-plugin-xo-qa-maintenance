@@ -37,10 +37,16 @@
 						"description": "The token used for authentication in the Jenkins",
 						"scope": "resource"
 					},
+					"xoQAMaintCIJobAnalyzer.dataFolder": {
+						"type": "string",
+						"default": "",
+						"description": "General data directory. If the db path for the project is not defined, a folder with the workspace name will be created.",
+						"scope": "resource"
+					},
 					"xoQAMaintCIJobAnalyzer.db": {
 						"type": "string",
 						"default": "",
-						"description": "A path to a local SQLi DB for the project. Project-specific.",
+						"description": "A path to a local SQLi DB for the project. *Project-specific*. Be aware that the plugin won't delete an old file, but likely will create a new one.",
 						"scope": "resource"
 					},
 					"xoQAMaintCIJobAnalyzer.screenshotsPath": {
@@ -51,19 +57,25 @@
 					"xoQAMaintCIJobAnalyzer.jenkinsJob": {
 						"type": "string",
 						"default": "",
-						"description": "A path to a CI job. Example: http://jervis.aureacentral.com/job/Exinda/job/exinda_exos_jenkins/job/enq-qa-integration/job/exinda-exos-protractor-devqa-automation/. Project-specific.",
+						"markdownDescription": "A path to a CI job. Example: http://jervis.aureacentral.com/job/Exinda/job/exinda_exos_jenkins/job/enq-qa-integration/job/exinda-exos-protractor-devqa-automation/. *Project-specific*.",
 						"scope": "resource"
 					},
 					"xoQAMaintCIJobAnalyzer.pathFromRoot": {
 						"type": "string",
 						"default": "e2e/test-suites",
-						"description": "path where test suites are suited in the project. Default to e2e/test-suites.",
+						"markdownDescription": "path where test suites are suited in the project. Default to `e2e/test-suites`.",
 						"scope": "resource"
 					},
 					"xoQAMaintCIJobAnalyzer.dataRetentionPolicy": {
 						"type": "string",
 						"default": "REMOVE_OLDER_THAN 1 month",
 						"description": "How the data should be cleaned.",
+						"scope": "resource"
+					},
+					"xoQAMaintCIJobAnalyzer.protractorPath": {
+						"type": "string",
+						"default": "${workspaceFolder}/node_modules/protractor/bin/protractor",
+						"description": "Path to protractor bin.",
 						"scope": "resource"
 					}
 				}
@@ -101,6 +113,10 @@
 			{
 				"command": "xoQAMaintCIJobAnalyzer.protractorRunFromCodeLens",
 				"title": "Run"
+			},
+			{
+				"command": "xoQAMaintCIJobAnalyzer.protractorDebug",
+				"title": "Debug"
 			},
 			{
 				"command": "xoQAMaintCIJobAnalyzer.showTcInfoFromCodeLens",

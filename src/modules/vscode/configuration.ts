@@ -15,6 +15,8 @@ export interface CommonConfig {
     jenkinsUser: string;
     jenkinsToken: string;
     dataRetentionPolicy: string;
+    protractorPath: string;
+    dataFolder: string;
 }
 
 export class Configuration {
@@ -46,21 +48,31 @@ export class Configuration {
     private static async readConfiguration() {
         this.log.info('Reading configuration');
         const config = await vscode.workspace.getConfiguration(PREFIX, null);
+
+        let commonConfig = {
+            jenkinsUser: config.get('jenkinsUser', ''),
+            jenkinsToken: config.get('jenkinsToken', ''),
+            dataRetentionPolicy: config.get('dataRetentionPolicy', ''),
+            dataFolder: config.get('dataFolder', ''),
+            protractorPath: config.get('protractorPath', '')
+        } as CommonConfig;
+
         let projectConfig = {
             db: config.get('db'),
             jenkinsJobUrl: config.get('jenkinsJob', ''),
             pathFromRoot: config.get('pathFromRoot'),
             screenshotsPath: config.get('screenshotsPath'),
         } as ProjecConfig;
+        if (!projectConfig.db && commonConfig.dataFolder && vscode.workspace.workspaceFolders) {
+            projectConfig.db = path.join(commonConfig.dataFolder,
+                vscode.workspace.workspaceFolders[0].name,
+                'the_db.db');
+        }
         if (!projectConfig.screenshotsPath) {
             projectConfig.screenshotsPath = path.join(path.dirname(projectConfig.db), 'attachments');
         }
 
-        let commonConfig = {
-            jenkinsUser: config.get('jenkinsUser', ''),
-            jenkinsToken: config.get('jenkinsToken', ''),
-            dataRetentionPolicy: config.get('dataRetentionPolicy'),
-        } as CommonConfig;
+
         this.log.debug(`The project config`, projectConfig);
         return {
             projectConfig, commonConfig
