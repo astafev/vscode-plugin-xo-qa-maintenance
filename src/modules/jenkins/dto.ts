@@ -1,7 +1,8 @@
-import { Behaviors, AllureReport } from "./allure-analyze";
+import { AllureReport } from "./allure-analyze";
 import { IJenkinsBuild } from "jenkins-api-ts-typings";
 import { JenkinsAPI } from "./jenkins";
 import * as _ from "lodash";
+import { makeLogger } from "../../utils";
 
 export interface CIBuild {
     getId(): number;
@@ -18,9 +19,8 @@ export interface CIBuild {
 }
 
 export class JenkinsBuild implements CIBuild {
+    private log = makeLogger();
     private consoleFull: Promise<string>;
-
-    private buildData?: { revision: string, branch: string };
 
     constructor(private build: IJenkinsBuild,
         private report: AllureReport) {
@@ -52,7 +52,8 @@ export class JenkinsBuild implements CIBuild {
             return param['name'] === name;
         });
         if (!paramVal) {
-            throw new Error(`Can't find the ${name} parameter`);
+            this.log.warn(`Can't find the ${name} parameter`);
+            return '';
         }
         return paramVal['value'];
     }

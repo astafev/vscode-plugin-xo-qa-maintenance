@@ -1,13 +1,18 @@
 import * as Sqlite from 'better-sqlite3';
 import { Configuration } from '../vscode/configuration';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 export class SqlUtil {
     protected db: Sqlite.Database;
 
     constructor() {
-        this.db = new Sqlite(Configuration.projectConfig.db);
+        const dbPath = Configuration.projectConfig.db;
+        if (!fs.existsSync(path.dirname(dbPath))) {
+            fs.mkdirSync(path.dirname(dbPath));
+        }
+        this.db = new Sqlite(dbPath);
     }
 
     public reset() {

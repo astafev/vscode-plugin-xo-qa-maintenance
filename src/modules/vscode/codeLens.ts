@@ -38,12 +38,14 @@ export class CodelensProvider implements vscode.CodeLensProvider {
                         command: "xoQAMaintCIJobAnalyzer.protractorRunFromCodeLens",
                         title: "Run Up To",
                         arguments: [doc.fileName, previous.join('|')],
+                        tooltip: "Run all the tests from this file up to this test."
                     }));
                 array.push(
                     new vscode.CodeLens(range, {
                         command: "xoQAMaintCIJobAnalyzer.protractorDebug",
                         title: "Debug Up To",
                         arguments: [doc.fileName, previous.join('|')],
+                        tooltip: "Run all the tests from this file up to this test in debug mode."
                     })
                 );
             } else {
