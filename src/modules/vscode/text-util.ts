@@ -43,7 +43,7 @@ export class E2eFile {
             throw new Error(`Not 2 arguments. ${callExpression.arguments.length}`);
         }
         let fnName = (callExpression.expression as ts.Identifier).escapedText;
-        if (fnName !== "describe" && fnName !== "it") {
+        if (fnName !== "describe" && fnName !== "it" && fnName !== "fdescribe" && fnName !== "fit") {
             throw new Error(`Unknown fn name. ${fnName}`);
         }
         let name = '';
