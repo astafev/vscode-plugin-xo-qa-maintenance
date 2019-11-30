@@ -9,7 +9,7 @@
 
 ![Demo](./demo1.gif)
 
-![Pulling a build](./demo1.gif)
+![Pulling a build](./demo2.gif)
 
 ## Extension Settings
 
