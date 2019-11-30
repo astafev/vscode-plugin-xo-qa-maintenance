@@ -6,7 +6,7 @@
 	"repository": {
 		"url": "https://github.com/astafev/vscode-plugin-xo-qa-maintenance/"
 	},
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.38.0"
 	},
