@@ -134,7 +134,7 @@ export class CleanUpUtils {
         try {
             const toDelete = CleanUpUtils.pullItemsForDeletion();
             if (_.isEmpty(toDelete.individualTestResults) && _.isEmpty(toDelete.ciRuns)) {
-                log.debug(`Not cleaning up anything yet. ${JSON.stringify(this.policies)}`);
+                log.debug(`Not cleaning up anything yet. ${JSON.stringify(CleanUpUtils.policies)}`);
                 return;
             } else {
                 log.info(`Going to clean up the following: ${JSON.stringify(toDelete)}`);
@@ -147,7 +147,7 @@ export class CleanUpUtils {
     }
 
     private static pullItemsForDeletion(): Items4Deletion {
-        let toDelete: Items4Deletion = this.policies.reduce((obj, policy) => {
+        let toDelete: Items4Deletion = CleanUpUtils.policies.reduce((obj, policy) => {
             let newObj = policy.pullSqlIds();
             return {
                 ciRuns: _.concat(obj.ciRuns, newObj.ciRuns) as number[],
@@ -162,7 +162,7 @@ export class CleanUpUtils {
 
     private static parseConfiguration() {
         let config = Configuration.commonConfig.dataRetentionPolicy;
-        this.policies.forEach((policy) => {
+        CleanUpUtils.policies.forEach((policy) => {
             let thisPolicy = policy.parse(config);
             config = config.replace(thisPolicy, '').trim();
         });

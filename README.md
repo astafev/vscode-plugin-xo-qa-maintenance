@@ -1,6 +1,13 @@
 ## Features
 
-TODO
+1. Provides a convenient way to start and debug individual tests.
+2. You can pull an allure report from Jenkins, store it in local DB (SQLite is being used)
+3. You can assign a comment for specific test cases (when you want to leave a note for yourself).
+4. You can navigate and see statuses of the tests in tree view.
+
+![IDE View](./Capture.png)
+
+![Demo](./demo1.gif)
 
 ## Extension Settings
 

@@ -45,6 +45,35 @@ export class RunDetailsWebView extends AbstractWebView {
         return processedLog;
     }
 
+    private tabs(runs: TestCaseRun[]): string {
+        return runs.map(run => {
+            return `<div id="tab${run.uid}" onclick="switchToBuild('${run.uid}')">${run.ci_run_id}: ${this.statusFomatted(run)}</div>`;
+        }).join('');
+    }
+
+    private statusFomatted(run: TestCaseRun) {
+        return `<span style="color: ${run.result === 'passed' ? 'limegreen' : 'red'};">${htmlencode(run.result)}</span>`;
+    }
+
+    private content(run: TestCaseRun, webview: vscode.Webview) {
+        return `<h2>Build <a href="${Configuration.projectConfig.jenkinsJobUrl}/${run.ci_run_id}/">#${run.ci_run_id}</a>.
+        Status: <a href="${Configuration.projectConfig.jenkinsJobUrl}/${run.ci_run_id}/allure/#testresult/${run.uid}/">${this.statusFomatted(run)}</a></h2>
+    
+        <p>
+            Duration: ${humanizeDuration(run.duration)}
+        </p>
+        <p>
+            <h3>Execution log</h3>
+            <pre>${this.printLog(run, webview)}</pre>
+        </p>`;
+    }
+
+    private allContent(runs: TestCaseRun[], webview: vscode.Webview): string {
+        return runs.map(run => {
+            return `<div class="content" id="content${run.uid}">${this.content(run, webview)}</div>`;
+        }).join('');
+    }
+
     public generateHtml(webview: vscode.Webview) {
         if (this.error !== undefined) {
             return this.fallBack(this.error);
@@ -57,7 +86,7 @@ export class RunDetailsWebView extends AbstractWebView {
         this.log.info(`Showing details view for ${this.details.id}`);
         // this.log.debug(JSON.stringify(this.details));
         // TODO set up CSP. The config suggested in the documentation makes styles not working
-        return `
+        let content = `
 <!DOCTYPE html>
 <html lang="en">
 
@@ -65,6 +94,23 @@ export class RunDetailsWebView extends AbstractWebView {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${this.details.id}."${this.details.title}"</title>
+    <style type="text/css">
+      .tabs>div {
+        display: inline-block;
+        padding: 15px 25px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+      .tabs>div.active {
+        font-weight: bold;
+      }
+      div.content {
+        display: none;
+      }
+      div.content.active {
+        display: block;
+      }
+    </style>
 </head>
 
 <body>
@@ -79,19 +125,14 @@ export class RunDetailsWebView extends AbstractWebView {
         <span id="errorMsg" style="color: red; display: none;">Error!</span>
         <span id="inProcessMsg" style="display: none;">Saving...</span>
     </p>
+    <div class="tabs">
+	    ${this.tabs(this.details.runs)}
+	</div>
     <hr>
-    <h2>Build <a href="${Configuration.projectConfig.jenkinsJobUrl}/${lastRun.ci_run_id}/">#${lastRun.ci_run_id}</a>.
-    Status: <a href="${Configuration.projectConfig.jenkinsJobUrl}/${lastRun.ci_run_id}/allure/#testresult/${lastRun.uid}/"><span style="color: ${lastRun.result === 'passed' ? 'limegreen' : 'red'};">${htmlencode(lastRun.result)}</span></a></h2>
-
-    <p>
-        Duration: ${humanizeDuration(lastRun.duration)}
-    </p>
-    <p>
-        <h3>Execution log</h3>
-        <pre>${this.printLog(lastRun, webview)}</pre>
-    </p>
+    ${this.allContent(this.details.runs, webview)}
 
     <script nonce="${nonce}">
+        var activeBuild = undefined;
         const vscode = acquireVsCodeApi();
     
         function updateComment_after(result) {
@@ -111,16 +152,30 @@ export class RunDetailsWebView extends AbstractWebView {
             let comment = document.getElementById('commentInput').value;
             document.getElementById('inProcessMsg').style.display = 'inline';
             try{
-                let result = vscode.postMessage({ command: 'commentUpdate', text: comment.trim(), uid: '${lastRun.uid}' });
+                let result = vscode.postMessage({ command: 'commentUpdate', text: comment.trim(), uid: activeBuild });
                 updateComment_after(true);
             } catch(e) {
                 updateComment_after(false);
             }
         }
+		function switchToBuild(uid) {
+		    if (uid === activeBuild) {
+			    return;
+			}
+		    document.getElementById('tab' + uid).classList.add('active');
+            document.getElementById('content' + uid).classList.add('active');
+            if (activeBuild) {
+                document.getElementById('tab' + activeBuild).classList.remove('active');
+			    document.getElementById('content' + activeBuild).classList.remove('active');
+			}
+			activeBuild = uid;
+		}
+		switchToBuild('${lastRun.uid}');
     </script>
 </body>
 
 </html>`;
+        return content;
     }
 
 }

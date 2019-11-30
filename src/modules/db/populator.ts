@@ -103,8 +103,8 @@ export class DbPopulator extends SqlUtil {
     }
 
     private storeTestCases(behaviors: Behaviors) {
-        let stmt = this.db.prepare(`INSERT OR REPLACE INTO test_case
-         (id, title) VALUES (?, ?)`);
+        let stmt = this.db.prepare(`INSERT INTO test_case
+         (id, title) VALUES (?, ?) ON CONFLICT DO NOTHING`);
         behaviors.children.forEach(ch => {
             stmt.run(ch.testCaseId, ch.name);
         });
