@@ -9,6 +9,8 @@
 
 ![Demo](./demo1.gif)
 
+![Pulling a build](./demo1.gif)
+
 ## Extension Settings
 
 This extension contributes the following settings:
