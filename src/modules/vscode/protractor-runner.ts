@@ -86,7 +86,7 @@ export namespace ProtractorRun {
         commandOutput.show();
 
         // Start a new command
-        var cmd = `protractor --specs ${filePath}`;
+        var cmd = `protractor --specs "${filePath}"`;
         if (grep) {
             cmd += ` --grep "${grep}"`;
         }

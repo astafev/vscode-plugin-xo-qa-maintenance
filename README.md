@@ -37,3 +37,7 @@ Initial release
 ### 0.0.2
 
 Add demo, some polishing.
+
+### 0.0.3
+
+Miniscule bug fix
