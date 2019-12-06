@@ -71,7 +71,7 @@ export class E2eFile {
             body: (callExpression.arguments[1] as ts.ArrowFunction).body as ts.Block,
             position: callExpression.pos,
             // by some reason, the pos is always somewhere 2 lines before
-            line: document.getLineAndCharacterOfPosition(callExpression.pos).line + 2,
+            line: document.getLineAndCharacterOfPosition(callExpression.arguments[0].pos).line,
             endLine: document.getLineAndCharacterOfPosition(callExpression.end).line
         };
     }
